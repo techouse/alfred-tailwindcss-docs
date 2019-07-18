@@ -1,6 +1,13 @@
 # Tailwind CSS Docs Workflow for Alfred
 
+![GitHub release](https://img.shields.io/github/release/techouse/alfred-tailwindcss-docs.svg)
+![GitHub All Releases](https://img.shields.io/github/downloads/techouse/alfred-tailwindcss-docs/total.svg)
+![GitHub](https://img.shields.io/github/license/techouse/alfred-tailwindcss-docs.svg)
+
+
 Search the [Tailwind CSS documentation](https://tailwindcss.com/docs/) using [Alfred](https://www.alfredapp.com/).
+
+![demo](demo.gif)
 
 ## Installation
 
