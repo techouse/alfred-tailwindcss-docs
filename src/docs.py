@@ -103,7 +103,7 @@ def main(wf):
     log.debug("version: " + version)
     log.debug("query without version: {!r}".format(query))
 
-    query = " ".join(words)
+    query = " ".join(query)
 
     key = cache_key(query, version)
 
