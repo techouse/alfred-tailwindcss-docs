@@ -102,7 +102,7 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string></string>
+	<string>Search the Tailwind CSS documentation using Alfred</string>
 	<key>uidata</key>
 	<dict>
 		<key>709668B9-4793-4106-9DFE-A58EF9BFA3EE</key>
@@ -120,6 +120,10 @@
 			<integer>260</integer>
 		</dict>
 	</dict>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.2</string>
 	<key>webaddress</key>
 	<string>https://github.com/techouse</string>
 </dict>
