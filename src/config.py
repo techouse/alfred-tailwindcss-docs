@@ -10,9 +10,9 @@ class Config(object):
     TAILWIND_ICON = "icon.png"
     GOOGLE_ICON = "google.png"
     # supported docs
-    SUPPORTED_TAILWIND_VERSIONS = {"v0", "v1", "v2"}
-    DEFAULT_TAILWIND_VERSION = "2"
+    SUPPORTED_TAILWIND_VERSIONS = {"v0", "v1", "v2", "v3"}
+    DEFAULT_TAILWIND_VERSION = "3"
     # Algolia credentials
-    ALGOLIA_APP_ID = "BH4D9OD16A"
-    ALGOLIA_SEARCH_ONLY_API_KEY = "3df93446658cd9c4e314d4c02a052188"
+    ALGOLIA_APP_ID = "KNPXZI5B0M"
+    ALGOLIA_SEARCH_ONLY_API_KEY = "5fc87cef58bb80203d2207578309fab6"
     ALGOLIA_SEARCH_INDEX = "tailwindcss"
