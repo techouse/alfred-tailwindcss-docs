@@ -60,7 +60,7 @@
 				<key>runningsubtext</key>
 				<string>Fetching the documentation ...</string>
 				<key>script</key>
-				<string>/usr/bin/python docs.py "{query}"</string>
+				<string>./docs -q "{query}"</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -123,7 +123,7 @@
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.0.5</string>
+	<string>2.0.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/techouse</string>
 </dict>
