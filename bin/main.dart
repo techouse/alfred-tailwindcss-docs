@@ -4,6 +4,7 @@ import 'package:alfred_workflow/alfred_workflow.dart'
     show AlfredItem, AlfredItemIcon, AlfredItemText, AlfredWorkflow;
 import 'package:algolia/algolia.dart' show AlgoliaQuerySnapshot;
 import 'package:args/args.dart' show ArgParser, ArgResults;
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:easy_debounce/easy_debounce.dart' show EasyDebounce;
 import 'package:html_unescape/html_unescape.dart' show HtmlUnescape;
 
@@ -87,32 +88,33 @@ void main(List<String> arguments) async {
     final ArgParser parser = ArgParser()
       ..addOption('query', abbr: 'q', mandatory: true)
       ..addFlag('verbose', abbr: 'v', defaultsTo: false);
-
     final ArgResults args = parser.parse(arguments);
 
-    final String query = args['query'].replaceAll(RegExp(r'\s+'), ' ').trim();
-    final String version = query.split(' ').firstWhere(
+    List<String> query =
+    args['query'].replaceAll(RegExp(r'\s+'), ' ').trim().split(' ');
+    String? version = query.firstWhereOrNull(
           (el) => Config.supportedVersions.contains(el),
-          orElse: () => Config.supportedVersions.last,
-        );
-
-    if (args['verbose']) {
-      verbose = true;
+    );
+    if (version != null) {
+      query.removeWhere((str) => str == version);
+    } else {
+      version = Config.supportedVersions.last;
     }
+    final String queryString = query.join(' ').trim();
 
-    if (verbose) {
-      stdout.writeln('Query: "$query"');
-    }
+    if (args['verbose']) verbose = true;
+
+    if (verbose) stdout.writeln('Query: "$queryString"');
 
     EasyDebounce.debounce(
       'search',
       Duration(milliseconds: 250),
-      () async {
-        if (query.isEmpty) {
+          () async {
+        if (queryString.isEmpty) {
           _showPlaceholder();
         } else {
           await _performSearch(
-            query,
+            queryString,
             version: version,
           );
         }
