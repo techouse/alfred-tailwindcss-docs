@@ -1,5 +1,5 @@
 name: tailwindcss_docs_alfred_workflow
-description: A simple command-line application.
+description: Search the Tailwind CSS documentation using Alfred
 
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
