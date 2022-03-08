@@ -12,7 +12,6 @@ environment:
 dependencies:
   algolia: ^1.0.4
   args: ^2.3.0
-  easy_debounce: ^2.0.2+1
   html_unescape: ^2.0.0
   alfred_workflow:
     git:
