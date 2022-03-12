@@ -13,10 +13,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: f28c7ca39f588bfe68d0abd6b68b06408b365abe
+      resolved-ref: f94dac49b7cbae5a73590f6db5772edd5defdba2
       url: "git@github.com:techouse/alfred_workflow.git"
     source: git
-    version: "0.0.1"
+    version: "0.0.2"
   algolia:
     dependency: "direct main"
     description:
@@ -66,6 +66,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
+  clock:
+    dependency: transitive
+    description:
+      name: clock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   collection:
     dependency: "direct main"
     description:
@@ -81,7 +88,7 @@ packages:
     source: hosted
     version: "3.0.1"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       url: "https://pub.dartlang.org"
@@ -108,6 +115,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.2"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
   file:
     dependency: transitive
     description:
@@ -150,6 +164,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.4.0"
   lints:
     dependency: "direct dev"
     description:
@@ -172,7 +193,7 @@ packages:
     source: hosted
     version: "2.0.2"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
@@ -192,6 +213,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.2"
+  stash:
+    dependency: transitive
+    description:
+      name: stash
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.1"
+  stash_file:
+    dependency: "direct main"
+    description:
+      name: stash_file
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.1"
+  stream_transform:
+    dependency: transitive
+    description:
+      name: stream_transform
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   string_scanner:
     dependency: transitive
     description:

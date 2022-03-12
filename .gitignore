@@ -10,3 +10,5 @@ build/
 
 # macOS specific
 .DS_Store
+
+bin/query_cache/
