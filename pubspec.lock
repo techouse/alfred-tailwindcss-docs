@@ -13,10 +13,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: f94dac49b7cbae5a73590f6db5772edd5defdba2
+      resolved-ref: ce134bbe1e10a8313f251b2c6ca97512d98dcb2d
       url: "git@github.com:techouse/alfred_workflow.git"
     source: git
-    version: "0.0.2"
+    version: "0.0.3"
   algolia:
     dependency: "direct main"
     description:
@@ -88,7 +88,7 @@ packages:
     source: hosted
     version: "3.0.1"
   crypto:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: crypto
       url: "https://pub.dartlang.org"
@@ -193,7 +193,7 @@ packages:
     source: hosted
     version: "2.0.2"
   path:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path
       url: "https://pub.dartlang.org"
@@ -221,7 +221,7 @@ packages:
     source: hosted
     version: "4.0.1"
   stash_file:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: stash_file
       url: "https://pub.dartlang.org"
