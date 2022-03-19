@@ -35,7 +35,7 @@ void main(List<String> arguments) async {
     workflow.clearItems();
 
     final ArgParser parser = ArgParser()
-      ..addOption('query', abbr: 'q', mandatory: true)
+      ..addOption('query', abbr: 'q', defaultsTo: '')
       ..addFlag('verbose', abbr: 'v', defaultsTo: false)
       ..addFlag('update', abbr: 'u', defaultsTo: false);
     final ArgResults args = parser.parse(arguments);
