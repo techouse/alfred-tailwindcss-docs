@@ -13,10 +13,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: ce134bbe1e10a8313f251b2c6ca97512d98dcb2d
+      resolved-ref: "3bcaed9a5848e962ece41074eebbe07d236cad18"
       url: "git@github.com:techouse/alfred_workflow.git"
     source: git
-    version: "0.0.3"
+    version: "0.0.5"
   algolia:
     dependency: "direct main"
     description:
@@ -107,7 +107,7 @@ packages:
       name: dart_code_metrics
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.12.0"
+    version: "4.13.0"
   dart_style:
     dependency: transitive
     description:
@@ -199,6 +199,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -269,6 +276,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  xml:
+    dependency: transitive
+    description:
+      name: xml
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.4.1"
   yaml:
     dependency: transitive
     description:

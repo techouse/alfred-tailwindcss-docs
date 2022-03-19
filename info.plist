@@ -8,11 +8,36 @@
 	<string>Productivity</string>
 	<key>connections</key>
 	<dict>
+		<key>54CB9D8A-3FC3-4570-9CDC-CBE9197102B7</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>32B3C427-9180-4209-9432-B2890069F63E</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>709668B9-4793-4106-9DFE-A58EF9BFA3EE</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>A6C3EF08-1D63-4571-9A71-253A36551FB4</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>709668B9-4793-4106-9DFE-A58EF9BFA3EE</string>
+				<string>54CB9D8A-3FC3-4570-9CDC-CBE9197102B7</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -32,6 +57,29 @@
 	<string>Tailwind CSS Docs</string>
 	<key>objects</key>
 	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>./docs -u</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>32B3C427-9180-4209-9432-B2890069F63E</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
@@ -84,6 +132,36 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>0</integer>
+						<key>matchstring</key>
+						<string>update:workflow</string>
+						<key>outputlabel</key>
+						<string>Update Workflow</string>
+						<key>uid</key>
+						<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>Open URL</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>54CB9D8A-3FC3-4570-9CDC-CBE9197102B7</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>browser</key>
 				<string></string>
 				<key>spaces</key>
@@ -105,12 +183,26 @@
 	<string>Search the Tailwind CSS documentation using Alfred</string>
 	<key>uidata</key>
 	<dict>
+		<key>32B3C427-9180-4209-9432-B2890069F63E</key>
+		<dict>
+			<key>xpos</key>
+			<integer>640</integer>
+			<key>ypos</key>
+			<integer>115</integer>
+		</dict>
+		<key>54CB9D8A-3FC3-4570-9CDC-CBE9197102B7</key>
+		<dict>
+			<key>xpos</key>
+			<integer>430</integer>
+			<key>ypos</key>
+			<integer>280</integer>
+		</dict>
 		<key>709668B9-4793-4106-9DFE-A58EF9BFA3EE</key>
 		<dict>
 			<key>xpos</key>
-			<integer>435</integer>
+			<integer>640</integer>
 			<key>ypos</key>
-			<integer>260</integer>
+			<integer>410</integer>
 		</dict>
 		<key>A6C3EF08-1D63-4571-9A71-253A36551FB4</key>
 		<dict>
@@ -123,7 +215,7 @@
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>2.0.4</string>
+	<string>2.0.5</string>
 	<key>webaddress</key>
 	<string>https://github.com/techouse</string>
 </dict>
