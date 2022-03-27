@@ -13,10 +13,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "3bcaed9a5848e962ece41074eebbe07d236cad18"
+      resolved-ref: ecbe8de5c4b6cc997836a4b62111a105a4352979
       url: "git@github.com:techouse/alfred_workflow.git"
     source: git
-    version: "0.0.5"
+    version: "0.0.8"
   algolia:
     dependency: "direct main"
     description:
@@ -87,6 +87,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  copy_with_extension:
+    dependency: transitive
+    description:
+      name: copy_with_extension
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   crypto:
     dependency: transitive
     description:
