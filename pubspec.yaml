@@ -4,7 +4,7 @@ description: Search the Tailwind CSS documentation using Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 2.0.8
+version: 2.0.9
 
 environment:
   sdk: '>=2.16.1 <3.0.0'
@@ -13,10 +13,7 @@ dependencies:
   algolia: ^1.0.4
   args: ^2.3.0
   html_unescape: ^2.0.0
-  alfred_workflow:
-    git:
-      url: git@github.com:techouse/alfred_workflow.git
-      ref: master
+  alfred_workflow: ^0.1.2
   collection: ^1.16.0
 
 dev_dependencies:

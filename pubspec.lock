@@ -11,12 +11,10 @@ packages:
   alfred_workflow:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: ecbe8de5c4b6cc997836a4b62111a105a4352979
-      url: "git@github.com:techouse/alfred_workflow.git"
-    source: git
-    version: "0.0.8"
+      name: alfred_workflow
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   algolia:
     dependency: "direct main"
     description:
@@ -58,7 +56,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.8.2"
+    version: "2.9.0"
   charcode:
     dependency: transitive
     description:
