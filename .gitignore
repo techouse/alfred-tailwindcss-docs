@@ -13,3 +13,4 @@ build/
 
 bin/query_cache/
 bin/update_cache/
+sign.sh
