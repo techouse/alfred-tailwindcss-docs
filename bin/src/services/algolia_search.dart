@@ -1,4 +1,5 @@
-import 'package:algolia/algolia.dart' show Algolia, AlgoliaQuerySnapshot;
+import 'package:algolia/algolia.dart'
+    show Algolia, AlgoliaQuery, AlgoliaQuerySnapshot;
 
 import '../constants/config.dart';
 import '../models/search_result.dart';
@@ -14,16 +15,18 @@ class AlgoliaSearch {
   static Future<AlgoliaQuerySnapshot> query(
     String queryString, {
     String? version,
-  }) async =>
-      _algolia.instance
-          .index(Config.algoliaSearchIndex)
-          .query(queryString)
-          .facetFilter('version:${version ?? Config.supportedVersions.last}')
-          .setAttributesToRetrieve(SearchResult.attributesToRetrieve)
-          .setAttributesToSnippet(SearchResult.attributesToSnippet)
-          .setSnippetEllipsisText(SearchResult.snippetEllipsisText)
-          .setDistinct(value: 1)
-          .setPage(0)
-          .setHitsPerPage(20)
-          .getObjects();
+  }) async {
+    final AlgoliaQuery query = _algolia.instance
+        .index(Config.algoliaSearchIndex)
+        .query(queryString)
+        .facetFilter('version:${version ?? Config.supportedVersions.last}')
+        .setAttributesToRetrieve(SearchResult.attributesToRetrieve)
+        .setAttributesToSnippet(SearchResult.attributesToSnippet)
+        .setSnippetEllipsisText(SearchResult.snippetEllipsisText)
+        .setDistinct(value: 1)
+        .setPage(0)
+        .setHitsPerPage(20);
+
+    return await query.getObjects();
+  }
 }
