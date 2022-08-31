@@ -1,5 +1,9 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'search_result_hierarchy.dart';
 
+part 'search_result.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class SearchResult {
   const SearchResult({
     required this.objectID,
@@ -40,20 +44,25 @@ class SearchResult {
 
   static const String snippetEllipsisText = '...';
 
-  SearchResult.fromJson(Map<String, dynamic> json)
-      : objectID = json['objectID'] as String,
-        type = json['type'] as String,
-        url = json['url'] as String,
-        hierarchy = SearchResultHierarchy.fromJson(
-          json['hierarchy'] as Map<String, dynamic>,
-        ),
-        content = json['content'] as String?;
+  factory SearchResult.fromJson(Map<String, dynamic> json) =>
+      _$SearchResultFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'objectID': objectID,
-        'type': type,
-        'url': url,
-        'content': content,
-        'hierarchy': hierarchy.toJson(),
-      };
+  Map<String, dynamic> toJson() => _$SearchResultToJson(this);
+
+  // SearchResult.fromJson(Map<String, dynamic> json)
+  //     : objectID = json['objectID'] as String,
+  //       type = json['type'] as String,
+  //       url = json['url'] as String,
+  //       hierarchy = SearchResultHierarchy.fromJson(
+  //         json['hierarchy'] as Map<String, dynamic>,
+  //       ),
+  //       content = json['content'] as String?;
+  //
+  // Map<String, dynamic> toJson() => {
+  //       'objectID': objectID,
+  //       'type': type,
+  //       'url': url,
+  //       'content': content,
+  //       'hierarchy': hierarchy.toJson(),
+  //     };
 }
