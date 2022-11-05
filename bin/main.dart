@@ -13,26 +13,20 @@ import 'package:args/args.dart' show ArgParser, ArgResults;
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:html_unescape/html_unescape.dart' show HtmlUnescape;
 
-import 'src/constants/config.dart' show Config;
+import 'src/env/env.dart' show Env;
 import 'src/models/search_result.dart' show SearchResult;
 import 'src/services/algolia_search.dart' show AlgoliaSearch;
 
-final HtmlUnescape unescape = HtmlUnescape();
+part 'main_helpers.dart';
 
-final AlfredWorkflow workflow = AlfredWorkflow();
-final AlfredUpdater updater = AlfredUpdater(
-  githubRepositoryUrl: Config.githubRepositoryUrl,
-  currentVersion: Config.version,
-  updateInterval: Duration(days: 7),
-);
-bool verbose = false;
-bool update = false;
+bool _verbose = false;
+bool _update = false;
 
 void main(List<String> arguments) async {
   try {
     exitCode = 0;
 
-    workflow.clearItems();
+    _workflow.clearItems();
 
     final ArgParser parser = ArgParser()
       ..addOption('query', abbr: 'q', defaultsTo: '')
@@ -40,122 +34,50 @@ void main(List<String> arguments) async {
       ..addFlag('update', abbr: 'u', defaultsTo: false);
     final ArgResults args = parser.parse(arguments);
 
-    update = args['update'];
-    if (update) {
+    _update = args['update'];
+    if (_update) {
       stdout.writeln('Updating workflow...');
 
-      return await updater.update();
+      return await _updater.update();
     }
 
-    verbose = args['verbose'];
+    _verbose = args['verbose'];
 
     List<String> query =
         args['query'].replaceAll(RegExp(r'\s+'), ' ').trim().split(' ');
     String? version =
-        query.firstWhereOrNull((el) => Config.supportedVersions.contains(el));
+        query.firstWhereOrNull((el) => Env.supportedVersions.contains(el));
     if (version != null) {
       query.removeWhere((str) => str == version);
     } else {
-      version = Config.supportedVersions.last;
+      version = Env.supportedVersions.last;
     }
     final String queryString = query.join(' ').trim().toLowerCase();
 
-    if (verbose) stdout.writeln('Query: "$queryString"');
+    if (_verbose) stdout.writeln('Query: "$queryString"');
 
     if (queryString.isEmpty) {
       _showPlaceholder();
     } else {
-      workflow.cacheKey = '${queryString}_$version';
-      if (await workflow.getItems() == null) {
+      _workflow.cacheKey = '${queryString}_$version';
+      if (await _workflow.getItems() == null) {
         await _performSearch(queryString, version: version);
       }
     }
   } on FormatException catch (err) {
     exitCode = 2;
-    workflow.addItem(AlfredItem(title: err.toString()));
+    _workflow.addItem(AlfredItem(title: err.toString()));
   } catch (err) {
     exitCode = 1;
-    workflow.addItem(AlfredItem(title: err.toString()));
-    if (verbose) rethrow;
+    _workflow.addItem(AlfredItem(title: err.toString()));
+    if (_verbose) rethrow;
   } finally {
-    if (!update) {
-      if (await updater.updateAvailable()) {
-        workflow.run(addToBeginning: updateItem);
+    if (!_update) {
+      if (await _updater.updateAvailable()) {
+        _workflow.run(addToBeginning: updateItem);
       } else {
-        workflow.run();
+        _workflow.run();
       }
     }
-  }
-}
-
-const updateItem = AlfredItem(
-  title: 'Auto-Update available!',
-  subtitle: 'Press <enter> to auto-update to a new version of this workflow.',
-  arg: 'update:workflow',
-  match:
-      'Auto-Update available! Press <enter> to auto-update to a new version of this workflow.',
-  icon: AlfredItemIcon(path: 'alfredhatcog.png'),
-  valid: true,
-);
-
-void _showPlaceholder() {
-  workflow.addItem(
-    const AlfredItem(
-      title: 'Search the Tailwind CSS docs...',
-      icon: AlfredItemIcon(path: 'icon.png'),
-    ),
-  );
-}
-
-Future<void> _performSearch(String query, {String? version}) async {
-  final AlgoliaQuerySnapshot snapshot = await AlgoliaSearch.query(
-    query,
-    version: version,
-  );
-
-  if (snapshot.nbHits > 0) {
-    final AlfredItems items = AlfredItems(
-      snapshot.hits
-          .map((snapshot) => SearchResult.fromJson(snapshot.data))
-          .map((result) {
-        final int level = int.tryParse(result.type.substring(3)) ?? 0;
-        final String? title = result.hierarchy.getLevel(level);
-        final Map<String, String?> hierarchy = result.hierarchy.toJson()
-          ..removeWhere((_, value) => value == null);
-
-        return AlfredItem(
-          uid: result.objectID,
-          title: title!,
-          subtitle:
-              level > 0 ? unescape.convert(hierarchy.values.join(' > ')) : null,
-          arg: result.url,
-          text: AlfredItemText(
-            largeType: title,
-            copy: result.url,
-          ),
-          quickLookUrl: result.url,
-          icon: AlfredItemIcon(path: 'icon.png'),
-          valid: true,
-        );
-      }).toList(),
-    );
-    workflow.addItems(items.items);
-  } else {
-    final Uri url =
-        Uri.https('www.google.com', '/search', {'q': 'Tailwind CSS $query'});
-
-    workflow.addItem(
-      AlfredItem(
-        title: 'No matching answers found',
-        subtitle: 'Shall I try and search Google?',
-        arg: url.toString(),
-        text: AlfredItemText(
-          copy: url.toString(),
-        ),
-        quickLookUrl: url.toString(),
-        icon: AlfredItemIcon(path: 'google.png'),
-        valid: true,
-      ),
-    );
   }
 }
