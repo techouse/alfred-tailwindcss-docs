@@ -29,6 +29,10 @@ check_style:
 	@# Help: Analyze the project's Dart code and check the formatting one or more Dart files.
 	make analyze && make check_format
 
+clean_code_gen:
+	@# Help: Remove all generated files.
+	dart run build_runner clean
+
 code_gen:
 	@# Help: Run the build system for Dart code generation and modular compilation.
 	dart run build_runner build --delete-conflicting-outputs
