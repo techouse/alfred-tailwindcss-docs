@@ -2,7 +2,8 @@ part of 'main.dart';
 
 final HtmlUnescape _unescape = HtmlUnescape();
 
-final AlfredWorkflow _workflow = AlfredWorkflow();
+final AlfredWorkflow _workflow = AlfredWorkflow()
+  ..disableAlfredSmartResultOrdering = true;
 
 final AlfredUpdater _updater = AlfredUpdater(
   githubRepositoryUrl: Uri.parse(Env.githubRepositoryUrl),
