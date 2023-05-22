@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import 'search_result_hierarchy.dart';
 
 part 'search_result.g.dart';
