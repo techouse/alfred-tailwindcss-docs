@@ -4,24 +4,24 @@ description: Search the Tailwind CSS documentation using Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 2.1.10
+version: 2.1.11
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=3.0.1 <4.0.0'
 
 dependencies:
-  algolia: ^1.1.1
-  args: ^2.3.1
-  cli_script: ^0.3.0
-  envied: ^0.3.0
+  algolia: ^1.1.2
+  args: ^2.4.1
+  cli_script: ^0.3.1
+  envied: ^0.3.0+3
   html_unescape: ^2.0.0
-  alfred_workflow: ^0.3.0+1
-  collection: ^1.17.0
-  json_annotation: ^4.7.0
+  alfred_workflow: ^0.3.2+1
+  collection: ^1.17.2
+  json_annotation: ^4.8.1
 
 dev_dependencies:
-  build_runner: ^2.3.3
-  dart_code_metrics: ^5.3.0
-  envied_generator: ^0.3.0
-  json_serializable: ^6.5.4
-  lints: ^2.0.1
+  build_runner: ^2.4.4
+  dart_code_metrics: ^5.7.4
+  envied_generator: ^0.3.0+3
+  json_serializable: ^6.7.0
+  lints: ^2.1.0
