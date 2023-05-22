@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: write
     env:
-      WORKFLOW_NAME: docs
+      WORKFLOW_NAME: tailwindcss-docs
       GITHUB_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
     steps:
       - uses: dart-lang/setup-dart@v1
