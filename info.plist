@@ -65,7 +65,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>arch -x86_64 ./docs -u</string>
+				<string>arch -x86_64 ./workflow -u</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -108,7 +108,7 @@
 				<key>runningsubtext</key>
 				<string>Fetching the documentation ...</string>
 				<key>script</key>
-				<string>arch -x86_64 ./docs -q "{query}"</string>
+				<string>arch -x86_64 ./workflow -q "{query}"</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -221,8 +221,8 @@
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>2.1.10</string>
+	<string></string>
 	<key>webaddress</key>
-	<string>https://github.com/techouse</string>
+	<string></string>
 </dict>
 </plist>

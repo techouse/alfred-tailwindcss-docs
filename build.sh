@@ -36,4 +36,4 @@ else
   echo 'Info: Unable to generate OSS LICENSES. Please install https://github.com/techouse/dart_pubspec_licenses_lite'
 fi
 
-dart compile exe bin/main.dart -o build/dist/docs -S build/debug_info/docs
+dart compile exe bin/main.dart -o build/dist/workflow -S build/debug_info/workflow

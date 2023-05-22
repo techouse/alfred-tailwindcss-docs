@@ -1,0 +1,192 @@
+name: Build package
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+defaults:
+  run:
+    shell: bash
+env:
+  PUB_ENVIRONMENT: bot.github
+permissions: read-all
+
+jobs:
+  analyze:
+    name: "Analyze"
+    runs-on: macos-latest
+    steps:
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - id: checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: dart pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze
+        run: dart analyze --fatal-infos
+  publish:
+    needs: analyze
+    name: "Build"
+    runs-on: macos-latest
+    environment: build
+    permissions:
+      contents: write
+    env:
+      WORKFLOW_NAME: docs
+      GITHUB_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - id: checkout
+        uses: actions/checkout@v3
+      - name: Compare version with ref/tag
+        if: startsWith(github.ref, 'refs/tags/')
+        id: compare_version_with_tag
+        run: |
+          set -e
+          VERSION=$(awk '/^version: / {print $2}' pubspec.yaml)
+          TAG=${GITHUB_REF_NAME#v}
+          if [[ "$VERSION" != "$TAG" ]]; then
+            echo "Version in pubspec.yaml ($VERSION) does not match tag ($TAG)"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Configure .env file
+        id: generate_env_file
+        env:
+          ALGOLIA_SEARCH_INDEX: ${{ vars.ALGOLIA_SEARCH_INDEX }}
+          ALGOLIA_APPLICATION_ID: ${{ vars.ALGOLIA_APPLICATION_ID }}
+          ALGOLIA_SEARCH_ONLY_API_KEY: ${{ vars.ALGOLIA_SEARCH_ONLY_API_KEY }}
+        run: |
+          set -e
+          mv .env.example .env
+          sed -i '' "s#APP_VERSION=.*#APP_VERSION=$VERSION#" .env
+          sed -i '' "s#GITHUB_REPOSITORY_URL=.*#GITHUB_REPOSITORY_URL=$GITHUB_REPOSITORY_URL#" .env
+          sed -i '' "s#ALGOLIA_SEARCH_INDEX=.*#ALGOLIA_SEARCH_INDEX=$ALGOLIA_SEARCH_INDEX#" .env
+          sed -i '' "s#ALGOLIA_APPLICATION_ID=.*#ALGOLIA_APPLICATION_ID=$ALGOLIA_APPLICATION_ID#" .env
+          sed -i '' "s#ALGOLIA_SEARCH_ONLY_API_KEY=.*#ALGOLIA_SEARCH_ONLY_API_KEY=$ALGOLIA_SEARCH_ONLY_API_KEY#" .env
+      - name: Configure the info.plist
+        id: info_plist
+        run: |
+          set -e
+          /usr/libexec/PlistBuddy -c "Set :version $VERSION" ./info.plist
+          /usr/libexec/PlistBuddy -c "Set :webaddress $GITHUB_REPOSITORY_URL" ./info.plist
+      - name: Install dependencies
+        id: install_dependencies
+        run: |
+          dart pub get
+          dart pub global activate -sgit https://github.com/techouse/dart_pubspec_licenses_lite
+      - name: Run Dart code generation
+        id: generate_code
+        run: dart run build_runner build --delete-conflicting-outputs
+      - name: Build executable
+        id: build_executable
+        run: bash ./build.sh
+      - name: Install the Apple certificate
+        id: install_certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -e
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          
+          # import certificate
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      - name: Sign executable
+        id: sign_executable
+        env:
+          BUILD_CERTIFICATE_SHA1: ${{ secrets.BUILD_CERTIFICATE_SHA1 }}
+          BUNDLE_ID: ${{ vars.BUNDLE_ID }}
+        run: |
+          set -e
+          codesign \
+            --sign="$BUILD_CERTIFICATE_SHA1" \
+            --identifier="$BUNDLE_ID" \
+            --deep \
+            --force \
+            --options=runtime \
+            --entitlement="./entitlements.plist" \
+            --timestamp \
+            --verbose=4 \
+            ./build/dist/workflow
+      - name: Verify signature
+        id: verify_executable_signature
+        env:
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          set -e
+          if [[ $(codesign -dv ./build/dist/workflow 2>&1 | awk -F= '/TeamIdentifier/{print $2}') != "$TEAM_ID" ]]; then
+            echo "The TeamIdentifier in the signature does not match the signing TeamIdentifier."
+            exit 1
+          fi
+      - name: Package executable into ZIP archive
+        id: zip_executable
+        run: |
+          set -e
+          zip -j ./build/dist/workflow.zip ./build/dist/workflow
+      - name: Create notarytool Keychain profile
+        id: create_keychain_profile
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          NOTARYTOOL_PASSWORD: ${{ secrets.NOTARYTOOL_PASSWORD }}
+          NOTARYTOOL_KEYCHAIN_PROFILE: ${{ vars.NOTARYTOOL_KEYCHAIN_PROFILE }}
+        run: |
+          set -e
+          xcrun notarytool \
+            store-credentials "$NOTARYTOOL_KEYCHAIN_PROFILE" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$NOTARYTOOL_PASSWORD"
+      - name: Notarize executable
+        id: notarize_executable
+        env:
+          NOTARYTOOL_KEYCHAIN_PROFILE: ${{ vars.NOTARYTOOL_KEYCHAIN_PROFILE }}
+        run: |
+          set -e
+          xcrun notarytool \
+            submit ./build/dist/workflow.zip \
+            --keychain-profile "$NOTARYTOOL_KEYCHAIN_PROFILE" \
+            --wait
+      - name: Delete obsolete ZIP archive
+        id: delete_zip_archive
+        run: |
+          set -e
+          rm -rf ./build/dist/workflow.zip
+      - name: Create Alfred Workflow
+        id: create_alfred_workflow
+        run: |
+          set -e
+          pushd ./build/dist || exit
+          find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
+          popd || exit
+          echo "artifactPath=build/${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" >> $GITHUB_ENV
+      - name: Release
+        id: release_workflow
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.artifactPath }}
+      - name: Clean up keychain and build directory
+        id: clean_up
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          rm -rf $RUNNER_TEMP/build_certificate.p12
+          rm .env
+          rm -rf ./build
