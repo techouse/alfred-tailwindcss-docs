@@ -19,7 +19,6 @@ jobs:
     permissions:
       contents: write
     env:
-      WORKFLOW_NAME: tailwindcss-docs
       GITHUB_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
     steps:
       - uses: dart-lang/setup-dart@v1
@@ -111,7 +110,6 @@ jobs:
             --options=runtime \
             --entitlement="./entitlements.plist" \
             --timestamp \
-            --verbose=4 \
             ./build/dist/workflow
       - name: Verify signature
         id: verify_executable_signature
@@ -159,11 +157,13 @@ jobs:
           rm -rf ./build/dist/workflow.zip
       - name: Create Alfred Workflow
         id: create_alfred_workflow
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
         run: |
           set -e
-          pushd ./build/dist || exit
+          pushd ./build/dist || exit 1
           find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
-          popd || exit
+          popd || exit 1
           echo "artifactPath=build/${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" >> $GITHUB_ENV
       - name: Release
         id: release_workflow
