@@ -99,9 +99,9 @@ jobs:
         id: sign_executable
         env:
           BUILD_CERTIFICATE_SHA1: ${{ secrets.BUILD_CERTIFICATE_SHA1 }}
-          BUNDLE_ID: ${{ vars.BUNDLE_ID }}
         run: |
           set -e
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'print ":bundleid"' info.plist)
           codesign \
             --sign="$BUILD_CERTIFICATE_SHA1" \
             --identifier="$BUNDLE_ID" \
