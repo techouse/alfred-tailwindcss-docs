@@ -25,7 +25,7 @@ jobs:
         with:
           sdk: stable
       - id: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Compare version with ref/tag
         if: startsWith(github.ref, 'refs/tags/')
         id: compare_version_with_tag
@@ -56,8 +56,8 @@ jobs:
         id: info_plist
         run: |
           set -e
-          /usr/libexec/PlistBuddy -c "Set :version $VERSION" ./info.plist
-          /usr/libexec/PlistBuddy -c "Set :webaddress $GITHUB_REPOSITORY_URL" ./info.plist
+          /usr/libexec/PlistBuddy -c "Set :version $VERSION" info.plist
+          /usr/libexec/PlistBuddy -c "Set :webaddress $GITHUB_REPOSITORY_URL" info.plist
       - name: Install dependencies
         id: install_dependencies
         run: |
@@ -72,7 +72,7 @@ jobs:
         run: dart analyze --fatal-infos
       - name: Build executable
         id: build_executable
-        run: bash ./build.sh
+        run: bash build.sh
       - name: Install the Apple certificate
         id: install_certificate
         env:
@@ -108,16 +108,16 @@ jobs:
             --deep \
             --force \
             --options=runtime \
-            --entitlement="./entitlements.plist" \
+            --entitlement="entitlements.plist" \
             --timestamp \
-            ./build/dist/workflow
+            build/dist/workflow
       - name: Verify signature
         id: verify_executable_signature
         env:
           TEAM_ID: ${{ secrets.TEAM_ID }}
         run: |
           set -e
-          if [[ $(codesign -dv ./build/dist/workflow 2>&1 | awk -F= '/TeamIdentifier/{print $2}') != "$TEAM_ID" ]]; then
+          if [[ $(codesign -dv build/dist/workflow 2>&1 | awk -F= '/TeamIdentifier/{print $2}') != "$TEAM_ID" ]]; then
             echo "The TeamIdentifier in the signature does not match the signing TeamIdentifier."
             exit 1
           fi
@@ -125,7 +125,7 @@ jobs:
         id: zip_executable
         run: |
           set -e
-          zip -j ./build/dist/workflow.zip ./build/dist/workflow
+          zip -j build/dist/workflow.zip build/dist/workflow
       - name: Create notarytool Keychain profile
         id: create_keychain_profile
         env:
@@ -147,23 +147,22 @@ jobs:
         run: |
           set -e
           xcrun notarytool \
-            submit ./build/dist/workflow.zip \
+            submit build/dist/workflow.zip \
             --keychain-profile "$NOTARYTOOL_KEYCHAIN_PROFILE" \
             --wait
       - name: Delete obsolete ZIP archive
         id: delete_zip_archive
         run: |
           set -e
-          rm -rf ./build/dist/workflow.zip
+          rm -rf build/dist/workflow.zip
       - name: Create Alfred Workflow
         id: create_alfred_workflow
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+        working-directory: build/dist
         run: |
           set -e
-          pushd ./build/dist || exit 1
           find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
-          popd || exit 1
           echo "artifactPath=build/${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" >> $GITHUB_ENV
       - name: Release
         id: release_workflow
@@ -177,4 +176,4 @@ jobs:
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
           rm -rf $RUNNER_TEMP/build_certificate.p12
           rm .env
-          rm -rf ./build
+          rm -rf build
