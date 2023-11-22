@@ -8,7 +8,7 @@ abstract class Env {
   static const String appVersion = _Env.appVersion;
 
   @EnviedField(varName: 'GITHUB_REPOSITORY_URL')
-  static const String githubRepositoryUrl = _Env.githubRepositoryUrl;
+  static final Uri githubRepositoryUrl = _Env.githubRepositoryUrl;
 
   @EnviedField(varName: 'ALGOLIA_APPLICATION_ID', obfuscate: true)
   static final String algoliaApplicationId = _Env.algoliaApplicationId;
