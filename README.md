@@ -32,10 +32,6 @@ The workflow supports searching the documentation of several versions. To change
 
 ![configure](configure.png)
 
-```
-twd flex v2
-```
-
 ### Note
 
 The lightning fast search is powered by [Algolia](https://www.algolia.com) using the _same_ index as the official [Tailwind CSS](https://tailwindcss.com/) website.
