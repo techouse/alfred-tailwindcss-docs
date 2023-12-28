@@ -217,9 +217,42 @@
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
-	<array/>
-	<key>variablesdontexport</key>
-	<array/>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>v3</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>3</string>
+						<string>v3</string>
+					</array>
+					<array>
+						<string>2</string>
+						<string>v2</string>
+					</array>
+					<array>
+						<string>1</string>
+						<string>v1</string>
+					</array>
+					<array>
+						<string>0</string>
+						<string>v0</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>Search the documentation of this Tailwind version</string>
+			<key>label</key>
+			<string>Tailwind version</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>tailwind_version</string>
+		</dict>
+	</array>
 	<key>version</key>
 	<string></string>
 	<key>webaddress</key>

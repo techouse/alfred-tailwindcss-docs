@@ -13,42 +13,42 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: af5fdb2d4111cacc99023a44152db24e8c6f443c59a0b6ac034fc6c29c09f0ad
+      sha256: ab87f6d5ab708b73efd3f7fcb5376ade843725920b6d17ac4052a0b147fafc62
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.1"
+    version: "0.6.0"
   algolia_client_core:
     dependency: transitive
     description:
       name: algolia_client_core
-      sha256: e233464ac15f1b53001998e573b66301ae0b88dd465ec91c9dd52a3be666eebc
+      sha256: dad4a2ede37efb01527cf9f6c0d0e0f80bc76add39d35e192a458c8e391b5ca6
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   algolia_client_insights:
     dependency: transitive
     description:
       name: algolia_client_insights
-      sha256: "5d2407b4a086027f2ce3542bb400c6771d3461a576af1e129321c9ec5fe6f183"
+      sha256: "6432bf0e1f48f15fcb15a150a408d00348da5d40812bbbdc5914b97d75502a4c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   algolia_client_search:
     dependency: transitive
     description:
       name: algolia_client_search
-      sha256: "72e7e2754be385edcb05cbe4f168eecf573278ed083032a3d338a7880deb62d4"
+      sha256: dcff94701449037374436f4f78cf47f72e7e42f7f7ae17e78567bc9a77345bf9
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   algoliasearch:
     dependency: "direct main"
     description:
       name: algoliasearch
-      sha256: "5162f27e982db30146040f568fbcd032d5ef88cad010d125a9f0fdfcc306e6b0"
+      sha256: d06e643bb480615e610162ef2276022f20e09163e6e137ac081e81785c7c80d1
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   analyzer:
     dependency: transitive
     description:
@@ -533,18 +533,18 @@ packages:
     dependency: transitive
     description:
       name: stash
-      sha256: "70a516b6d791fa760a9e58c4f01ac0230ca3be8d71d57fcec637996c7d4e463f"
+      sha256: "4858c547ba49cfd9a1964ff19cc087c682f20537147bad59ec54932d01de6a49"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   stash_file:
     dependency: transitive
     description:
       name: stash_file
-      sha256: dc90f076cef14d486e473e0156d6e256503e9193e8681b650d0e4e70c33210bd
+      sha256: "883314e8881f577acd0997fdb2982ae80df487698f3d5325e2d793124083381a"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   stream_channel:
     dependency: transitive
     description:
@@ -637,10 +637,10 @@ packages:
     dependency: transitive
     description:
       name: web_socket_channel
-      sha256: d88238e5eac9a42bb43ca4e721edba3c08c6354d4a53063afaa568516217621b
+      sha256: "045ec2137c27bf1a32e6ffa0e734d532a6677bf9016a0d1a406c54e499ff945b"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.1"
   xml:
     dependency: transitive
     description:

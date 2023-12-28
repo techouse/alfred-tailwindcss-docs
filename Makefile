@@ -49,10 +49,6 @@ install:
 	@# Help: Install all the project's packages
 	dart pub get
 
-sure:
-	@# Help: Analyze the project's Dart code, check the formatting one or more Dart files and run unit tests for the current project.
-	make check_style && make tests
-
 upgrade:
 	@# Help: Upgrade all the project's packages.
 	dart pub upgrade

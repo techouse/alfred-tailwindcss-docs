@@ -18,9 +18,4 @@ abstract class Env {
 
   @EnviedField(varName: 'ALGOLIA_SEARCH_INDEX', obfuscate: true)
   static final String algoliaSearchIndex = _Env.algoliaSearchIndex;
-
-  @EnviedField(varName: 'SUPPORTED_VERSIONS')
-  static const String _supportedVersions = _Env._supportedVersions;
-
-  static final List<String> supportedVersions = _supportedVersions.split(',');
 }

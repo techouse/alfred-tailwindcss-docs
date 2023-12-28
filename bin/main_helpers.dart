@@ -30,7 +30,7 @@ void _showPlaceholder() {
   );
 }
 
-Future<void> _performSearch(String query, {String? version}) async {
+Future<void> _performSearch(String query, {required String version}) async {
   try {
     final SearchResponse snapshot = await AlgoliaSearch.query(
       query,
