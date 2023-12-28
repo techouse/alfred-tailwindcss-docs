@@ -26,9 +26,9 @@ twd background color
 
 Either press `⌘Y` to Quick Look the result, or press `<enter>` to open it in your web browser.
 
-## Changing Branches
+## Changing the Tailwind CSS version to search
 
-The workflow supports searching the documentation of both branches, `v0`, `v1`, `v2` and `v3`. To change the branch, configure the Workflow as show in the image below.
+The workflow supports searching the documentation of several versions. To change the branch, configure the Workflow as show in the image below.
 
 ![configure](configure.png)
 
