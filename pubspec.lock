@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: ab87f6d5ab708b73efd3f7fcb5376ade843725920b6d17ac4052a0b147fafc62
+      sha256: "34b02327f124a6bcc306db4d1ed1eeffa7988b8679342471e7a1aae3a8af39fe"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.6.1"
   algolia_client_core:
     dependency: transitive
     description:
@@ -77,10 +77,10 @@ packages:
     dependency: transitive
     description:
       name: autoequal
-      sha256: "321091dcf5bf9492b67d2e7f98cfb5a789dfd63e28d041bd4fe34e319e424cfa"
+      sha256: bca5df6714add268a06de2b29044aa706a439f56c8be766c7d7adbe44bf42415
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.9.0"
   boolean_selector:
     dependency: transitive
     description:
