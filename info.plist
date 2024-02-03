@@ -65,7 +65,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>arch -x86_64 ./workflow -u</string>
+				<string>[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -u || ./workflow_intel -u</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -108,7 +108,7 @@
 				<key>runningsubtext</key>
 				<string>Fetching the documentation ...</string>
 				<key>script</key>
-				<string>arch -x86_64 ./workflow -q "{query}"</string>
+				<string>[ "$(uname -m)" = "arm64" ] &amp;&amp; ./workflow -q "{query}" || ./workflow_intel -q "{query}"</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>

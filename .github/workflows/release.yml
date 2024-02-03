@@ -1,0 +1,91 @@
+name: Release package
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+defaults:
+  run:
+    shell: bash
+env:
+  PUB_ENVIRONMENT: bot.github
+permissions: read-all
+
+jobs:
+  build:
+    name: "Build"
+    strategy:
+      matrix:
+        os: [macos-14, macos-12]
+      fail-fast: true
+    uses: ./.github/workflows/build.yml
+    with:
+      runs-on: ${{ matrix.os }}
+    secrets: inherit
+  github_release:
+    name: "Github Release"
+    needs: build
+    environment: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read pubspec.yaml version
+        id: read_pubspec_version
+        run: |
+          set -e
+          VERSION=$(yq -r '.version' pubspec.yaml)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Get arm64 artifact
+        id: download_arm64_artifact
+        uses: actions/download-artifact@v4
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+          ARCH: arm64
+        with:
+          name: ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${{ env.ARCH }}
+          path: ${{ runner.temp }}/download
+      - name: Get x86_64 artifact
+        id: download_x86_64_artifact
+        uses: actions/download-artifact@v4
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+          ARCH: x86_64
+        with:
+          name: ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${{ env.ARCH }}
+          path: ${{ runner.temp }}/download
+      - name: Unzip artifacts
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+        id: unzip_artifacts
+        working-directory: ${{ runner.temp }}/download
+        run: |
+          set -e
+          for ARCH in "arm64" "x86_64"; do
+            mkdir -p $ARCH
+            unzip -q ${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}-${ARCH}.zip -d $ARCH
+          done
+      - name: Create Alfred Workflow
+        id: create_alfred_workflow
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+        working-directory: ${{ runner.temp }}/download
+        run: |
+          set -e
+          mv x86_64/workflow arm64/workflow_intel
+          pushd arm64
+          find . -not -path "./*_cache*" -exec zip --symlinks "../${WORKFLOW_NAME}-v${VERSION}.alfredworkflow" {} +
+          popd
+      - name: Release
+        id: release_workflow
+        env:
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ runner.temp }}/download/${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}.alfredworkflow
+      - name: Clean up keychain and build directory
+        id: clean_up
+        if: ${{ always() }}
+        run: |
+          rm -rf $RUNNER_TEMP/download
