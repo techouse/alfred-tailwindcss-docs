@@ -81,7 +81,7 @@ jobs:
         id: release_workflow
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{ runner.temp }}/download/${{ env.WORKFLOW_NAME }}-v${{ env.VERSION }}.alfredworkflow
       - name: Clean up keychain and build directory
