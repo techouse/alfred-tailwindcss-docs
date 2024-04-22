@@ -15,7 +15,7 @@ dependencies:
   cli_script: ^1.0.0
   envied: ^0.5.4+1
   html_unescape: ^2.0.0
-  alfred_workflow: ^0.6.1
+  alfred_workflow: ^1.0.0
   collection: ^1.18.0
   json_annotation: ^4.8.1
 
