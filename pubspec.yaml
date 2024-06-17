@@ -16,7 +16,7 @@ dependencies:
   envied: ^0.5.4+1
   html_unescape: ^2.0.0
   alfred_workflow: ^1.0.1
-  collection: ^1.18.0
+  collection: ^1.19.0
   json_annotation: ^4.9.0
 
 dev_dependencies:
