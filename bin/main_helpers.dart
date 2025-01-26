@@ -37,7 +37,7 @@ Future<void> _performSearch(String query, {required String version}) async {
       version: version,
     );
 
-    if (snapshot.nbHits > 0) {
+    if ((snapshot.nbHits ?? 0) > 0) {
       final AlfredItems items = AlfredItems(
         snapshot.hits
             .map((Hit hit) => SearchResult.fromJson(
