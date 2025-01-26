@@ -4,7 +4,7 @@ description: Search the Tailwind CSS documentation using Alfred
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 2.2.2
+version: 2.3.0
 
 environment:
   sdk: ^3.4.0
