@@ -16,7 +16,7 @@ jobs:
     name: "Build"
     strategy:
       matrix:
-        os: [macos-14, macos-12]
+        os: [macos-latest, macos-13]
       fail-fast: true
     uses: ./.github/workflows/build.yml
     with:
