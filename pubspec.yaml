@@ -13,7 +13,7 @@ dependencies:
   algoliasearch: ^1.29.0
   args: ^2.6.0
   cli_script: ^1.0.0
-  envied: ^1.1.0
+  envied: ^1.1.1
   html_unescape: ^2.0.0
   alfred_workflow: ^1.0.2
   collection: ^1.19.1
