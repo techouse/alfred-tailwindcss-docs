@@ -10,7 +10,7 @@ environment:
   sdk: ^3.4.0
 
 dependencies:
-  algoliasearch: ^1.29.0
+  algoliasearch: ^1.30.2
   args: ^2.6.0
   cli_script: ^1.0.0
   envied: ^1.1.0
