@@ -256,6 +256,69 @@
 			<key>variable</key>
 			<string>tailwind_version</string>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<true/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Enable (Alfred 5.5+ only)</string>
+			</dict>
+			<key>description</key>
+			<string>Presents results from previous run when enabled and not expired. Mutually exclusive with Dart Cache.</string>
+			<key>label</key>
+			<string>Use Alfred Cache</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>use_alfred_cache</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<false/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Enable (Recommended for Alfred 5 or older)</string>
+			</dict>
+			<key>description</key>
+			<string>Presents results from previous run when enabled and not expired. Mutually exclusive with Alfred Cache.</string>
+			<key>label</key>
+			<string>Use File Cache</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>use_file_cache</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<integer>86400</integer>
+				<key>markercount</key>
+				<integer>24</integer>
+				<key>maxvalue</key>
+				<integer>86400</integer>
+				<key>minvalue</key>
+				<integer>5</integer>
+				<key>onlystoponmarkers</key>
+				<false/>
+				<key>showmarkers</key>
+				<false/>
+			</dict>
+			<key>description</key>
+			<string>Time to live for cached data is defined as a number of seconds between 5 and 86400 (i.e. 24 hours).</string>
+			<key>label</key>
+			<string>Cache TTL</string>
+			<key>type</key>
+			<string>slider</string>
+			<key>variable</key>
+			<string>cache_ttl</string>
+		</dict>
 	</array>
 	<key>version</key>
 	<string></string>
