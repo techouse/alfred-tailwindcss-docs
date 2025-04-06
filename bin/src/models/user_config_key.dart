@@ -4,7 +4,8 @@ enum UserConfigKey {
   tailwindVersion,
   useAlfredCache,
   useFileCache,
-  cacheTtl;
+  cacheTtl,
+  fileCacheMaxEntries;
 
   @override
   String toString() => name.snakeCase;

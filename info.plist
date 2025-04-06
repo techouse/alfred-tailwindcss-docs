@@ -319,6 +319,31 @@
 			<key>variable</key>
 			<string>cache_ttl</string>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<integer>1280</integer>
+				<key>markercount</key>
+				<integer>8</integer>
+				<key>maxvalue</key>
+				<integer>2048</integer>
+				<key>minvalue</key>
+				<integer>256</integer>
+				<key>onlystoponmarkers</key>
+				<true/>
+				<key>showmarkers</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Maximum File Cache entries</string>
+			<key>label</key>
+			<string>Max File Cache</string>
+			<key>type</key>
+			<string>slider</string>
+			<key>variable</key>
+			<string>file_cache_max_entries</string>
+		</dict>
 	</array>
 	<key>version</key>
 	<string></string>

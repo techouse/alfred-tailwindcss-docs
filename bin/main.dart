@@ -50,6 +50,10 @@ void main(List<String> arguments) {
           userDefaults?[UserConfigKey.useFileCache.toString()]
               as AlfredUserConfigurationCheckBox?;
 
+      final AlfredUserConfigurationNumberSlider? fileCacheMaxEntries =
+          userDefaults?[UserConfigKey.fileCacheMaxEntries.toString()]
+              as AlfredUserConfigurationNumberSlider?;
+
       final AlfredUserConfigurationCheckBox? useAlfredCache =
           userDefaults?[UserConfigKey.useAlfredCache.toString()]
               as AlfredUserConfigurationCheckBox?;
@@ -73,7 +77,8 @@ void main(List<String> arguments) {
       if (useAlfredCache?.value ?? false) {
         _workflow.useAutomaticCache = true;
       } else if (useFileCache?.value ?? false) {
-        _workflow.cacheKey = '${queryString}_${tailwindVersion.value}';
+        _workflow.maxCacheEntries =
+            fileCacheMaxEntries?.value ?? fileCacheMaxEntries?.defaultValue;
       }
 
       _workflow.cacheTimeToLive = cacheTimeToLive?.value;
@@ -81,6 +86,9 @@ void main(List<String> arguments) {
       if (queryString.isEmpty) {
         _showPlaceholder();
       } else {
+        if (useFileCache?.value ?? false) {
+          _workflow.cacheKey = '${queryString}_${tailwindVersion.value}';
+        }
         if ((await _workflow.getItems()).isEmpty) {
           await _performSearch(queryString, version: tailwindVersion.value);
         }
