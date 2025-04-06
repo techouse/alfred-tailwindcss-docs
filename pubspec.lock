@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: d60e1da50fae2b06f3e2adbea84deca4fa56240eb4a10395980a6923a7ea9b02
+      sha256: ef9787de3b4bdb8cde9be15b9cbca19004f07d389d19126e21afad28a8e23c80
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   algolia_client_core:
     dependency: transitive
     description:

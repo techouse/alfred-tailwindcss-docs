@@ -71,17 +71,12 @@ void main(List<String> arguments) {
       if (_verbose) stdout.writeln('Query: "$queryString"');
 
       if (useAlfredCache?.value ?? false) {
-        _workflow.automaticCache = AlfredAutomaticCache(
-          seconds: cacheTimeToLive?.value != null &&
-                  cacheTimeToLive!.value >= AlfredAutomaticCache.minSeconds &&
-                  cacheTimeToLive.value <= AlfredAutomaticCache.maxSeconds
-              ? cacheTimeToLive.value
-              : AlfredAutomaticCache.maxSeconds,
-          looseReload: true,
-        );
+        _workflow.useAutomaticCache = true;
       } else if (useFileCache?.value ?? false) {
         _workflow.cacheKey = '${queryString}_${tailwindVersion.value}';
       }
+
+      _workflow.cacheTimeToLive = cacheTimeToLive?.value;
 
       if (queryString.isEmpty) {
         _showPlaceholder();
