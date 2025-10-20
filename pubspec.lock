@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: alfred_workflow
-      sha256: ef9787de3b4bdb8cde9be15b9cbca19004f07d389d19126e21afad28a8e23c80
+      sha256: "3ed92789312853c01914a2eff5b846295e7708a375bf37ccb6d1421f72d32a3a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.2.0"
   algolia_client_core:
     dependency: transitive
     description:
@@ -73,14 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
-  autoequal:
-    dependency: transitive
-    description:
-      name: autoequal
-      sha256: "186f99b614d8dd5b5756b26b6208d21ab948d7798ecfdf84669fff18eed7aab2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -213,10 +205,10 @@ packages:
     dependency: transitive
     description:
       name: copy_with_extension
-      sha256: "0447e5ea09845b275fbeaa7605bc85e74da759788678760b2a6c4e06ca622410"
+      sha256: c9e09bce2fee69729ea55dbd55f7150d4cf6f7e55461091a02839c21346f1b95
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.1"
+    version: "10.0.1"
   crypto:
     dependency: transitive
     description:
@@ -273,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
+  equatable_annotations:
+    dependency: transitive
+    description:
+      name: equatable_annotations
+      sha256: "8ecab62f0b84c2b749c425a617c7c1fd3404dc7b7315da1490f6419ca37c9053"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   file:
     dependency: transitive
     description:
@@ -325,10 +325,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f
+      sha256: bb2ce4590bc2667c96f318d68cac1b5a7987ec819351d32b1c987239a815e007
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.0"
+    version: "1.5.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -405,10 +405,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
+      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
       url: "https://pub.dev"
     source: hosted
-    version: "1.16.0"
+    version: "1.17.0"
   mime:
     dependency: transitive
     description:
@@ -445,10 +445,10 @@ packages:
     dependency: transitive
     description:
       name: plist_parser
-      sha256: e2a6f9abfa0c45c0253656b7360abb0dfb84af9937bace74605b93d2aad2bf0c
+      sha256: "513ebec02049c4ef99571ceb66abf2c16c115256c1aff7b0125db77839a392b7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.11"
+    version: "0.2.5"
   pool:
     dependency: transitive
     description:
