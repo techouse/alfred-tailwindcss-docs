@@ -169,7 +169,7 @@ jobs:
           echo "ARTIFACT_PATH=build/${ARTIFACT_NAME}.zip" >> $GITHUB_ENV
       - name: Artifact
         id: success_artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
