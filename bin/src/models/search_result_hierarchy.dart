@@ -44,6 +44,7 @@ class SearchResultHierarchy {
   factory SearchResultHierarchy.fromJson(Map<String, dynamic> json) =>
       _$SearchResultHierarchyFromJson(json);
 
-  Map<String, String?> toJson() => _$SearchResultHierarchyToJson(this)
-      .map((key, value) => MapEntry(key, value?.toString()));
+  Map<String, String?> toJson() => _$SearchResultHierarchyToJson(
+    this,
+  ).map((key, value) => MapEntry(key, value?.toString()));
 }

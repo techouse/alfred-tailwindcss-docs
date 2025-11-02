@@ -39,8 +39,8 @@ void main(List<String> arguments) {
 
       _verbose = args['verbose'];
 
-      final Map<String, AlfredUserConfiguration>? userDefaults =
-          await _workflow.getUserDefaults();
+      final Map<String, AlfredUserConfiguration>? userDefaults = await _workflow
+          .getUserDefaults();
 
       final AlfredUserConfigurationSelect? tailwindVersion =
           userDefaults?[UserConfigKey.tailwindVersion.toString()]
@@ -66,8 +66,10 @@ void main(List<String> arguments) {
         throw Exception('tailwind_version not set!');
       }
 
-      final List<String> query =
-          args['query'].replaceAll(RegExp(r'\s+'), ' ').trim().split(' ');
+      final List<String> query = args['query']
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim()
+          .split(' ');
       query.removeWhere((str) => str == tailwindVersion.value);
 
       final String queryString = query.join(' ').trim().toLowerCase();

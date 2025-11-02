@@ -14,20 +14,19 @@ class AlgoliaSearch {
   static Future<SearchResponse> query(
     String queryString, {
     required String version,
-  }) =>
-      _client.searchIndex(
-        request: SearchForHits(
-          indexName: Env.algoliaSearchIndex,
-          query: queryString,
-          facetFilters: ['version:$version'],
-          attributesToRetrieve: SearchResult.attributesToRetrieve,
-          attributesToSnippet: SearchResult.attributesToSnippet,
-          snippetEllipsisText: SearchResult.snippetEllipsisText,
-          distinct: 1,
-          page: 0,
-          hitsPerPage: 20,
-        ),
-      );
+  }) => _client.searchIndex(
+    request: SearchForHits(
+      indexName: Env.algoliaSearchIndex,
+      query: queryString,
+      facetFilters: ['version:$version'],
+      attributesToRetrieve: SearchResult.attributesToRetrieve,
+      attributesToSnippet: SearchResult.attributesToSnippet,
+      snippetEllipsisText: SearchResult.snippetEllipsisText,
+      distinct: 1,
+      page: 0,
+      hitsPerPage: 20,
+    ),
+  );
 
-  static dispose() => _client.dispose();
+  static void dispose() => _client.dispose();
 }
