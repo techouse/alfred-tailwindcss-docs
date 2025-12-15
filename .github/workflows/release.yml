@@ -39,7 +39,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Get arm64 artifact
         id: download_arm64_artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
           ARCH: arm64
@@ -48,7 +48,7 @@ jobs:
           path: ${{ runner.temp }}/download
       - name: Get x86_64 artifact
         id: download_x86_64_artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
           ARCH: x86_64
