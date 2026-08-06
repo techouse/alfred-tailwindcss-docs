@@ -3,182 +3,219 @@ name: Build package
 on:
   workflow_call:
     inputs:
-      runs-on:
-        description: 'The runner type'
-        required: true
+      arm64-deployment-target:
+        description: Minimum macOS version for the Apple Silicon slice
+        required: false
         type: string
+        default: '11.0'
+      x86_64-deployment-target:
+        description: Minimum macOS version for the Intel slice
+        required: false
+        type: string
+        default: '10.15'
+
 defaults:
   run:
     shell: bash
-env:
-  PUB_ENVIRONMENT: bot.github
+
 permissions: read-all
 
 jobs:
-  publish:
-    name: "Build"
-    runs-on: "${{ inputs.runs-on }}"
+  build:
+    name: Build signed universal workflow
+    runs-on: macos-latest
     environment: build
-    env:
-      GITHUB_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
     steps:
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-      - id: checkout
-        uses: actions/checkout@v7
-      - name: Compare version with ref/tag
-        if: startsWith(github.ref, 'refs/tags/')
-        id: compare_version_with_tag
+      - uses: actions/checkout@v7
+
+      - name: Configure signing paths
         run: |
-          set -e
-          VERSION=$(awk '/^version: / {print $2}' pubspec.yaml)
-          TAG=${GITHUB_REF_NAME#v}
-          if [[ "$VERSION" != "$TAG" ]]; then
-            echo "Version in pubspec.yaml ($VERSION) does not match tag ($TAG)"
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-      - name: Configure .env file
-        id: generate_env_file
+          set -euo pipefail
+          echo "CERTIFICATE_PATH=${RUNNER_TEMP}/build_certificate.p12" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PATH=${RUNNER_TEMP}/app-signing.keychain-db" >> "$GITHUB_ENV"
+
+      - name: Install latest stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Cache Cargo build data
+        uses: Swatinem/rust-cache@v2
+
+      - name: Verify release version
+        run: |
+          set -euo pipefail
+          ./scripts/version-check.sh "$GITHUB_REF_NAME"
+          VERSION=$(awk '/^\[package\]$/ { p = 1; next } p && /^\[/ { exit } p && /^version = / { gsub(/["[:space:]]/, "", $3); print $3; exit }' Cargo.toml)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Build Apple Silicon release binary
         env:
-          ALGOLIA_SEARCH_INDEX: ${{ vars.ALGOLIA_SEARCH_INDEX }}
           ALGOLIA_APPLICATION_ID: ${{ vars.ALGOLIA_APPLICATION_ID }}
           ALGOLIA_SEARCH_ONLY_API_KEY: ${{ vars.ALGOLIA_SEARCH_ONLY_API_KEY }}
+          ALGOLIA_SEARCH_INDEX: ${{ vars.ALGOLIA_SEARCH_INDEX }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ inputs['arm64-deployment-target'] }}
+        run: cargo build --release --locked --target aarch64-apple-darwin
+
+      - name: Build Intel release binary
+        env:
+          ALGOLIA_APPLICATION_ID: ${{ vars.ALGOLIA_APPLICATION_ID }}
+          ALGOLIA_SEARCH_ONLY_API_KEY: ${{ vars.ALGOLIA_SEARCH_ONLY_API_KEY }}
+          ALGOLIA_SEARCH_INDEX: ${{ vars.ALGOLIA_SEARCH_INDEX }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ inputs['x86_64-deployment-target'] }}
+        run: cargo build --release --locked --target x86_64-apple-darwin
+
+      - name: Create universal binary
         run: |
-          set -e
-          mv .env.example .env
-          sed -i '' "s#APP_VERSION=.*#APP_VERSION=$VERSION#" .env
-          sed -i '' "s#GITHUB_REPOSITORY_URL=.*#GITHUB_REPOSITORY_URL=$GITHUB_REPOSITORY_URL#" .env
-          sed -i '' "s#ALGOLIA_SEARCH_INDEX=.*#ALGOLIA_SEARCH_INDEX=$ALGOLIA_SEARCH_INDEX#" .env
-          sed -i '' "s#ALGOLIA_APPLICATION_ID=.*#ALGOLIA_APPLICATION_ID=$ALGOLIA_APPLICATION_ID#" .env
-          sed -i '' "s#ALGOLIA_SEARCH_ONLY_API_KEY=.*#ALGOLIA_SEARCH_ONLY_API_KEY=$ALGOLIA_SEARCH_ONLY_API_KEY#" .env
-      - name: Configure the info.plist
-        id: info_plist
+          set -euo pipefail
+          mkdir -p target/universal-apple-darwin/release
+          lipo -create \
+            target/aarch64-apple-darwin/release/alfred_tailwindcss_docs \
+            target/x86_64-apple-darwin/release/alfred_tailwindcss_docs \
+            -output target/universal-apple-darwin/release/workflow
+          chmod 755 target/universal-apple-darwin/release/workflow
+
+      - name: Install cargo-about
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-about
+
+      - name: Package release workflow
+        run: ./scripts/package-workflow.sh target/universal-apple-darwin/release/workflow
+
+      - name: Verify packaged workflow
+        env:
+          ARM64_DEPLOYMENT_TARGET: ${{ inputs['arm64-deployment-target'] }}
+          EXPECTED_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+          X86_64_DEPLOYMENT_TARGET: ${{ inputs['x86_64-deployment-target'] }}
         run: |
-          set -e
-          /usr/libexec/PlistBuddy -c "Set :version $VERSION" info.plist
-          /usr/libexec/PlistBuddy -c "Set :webaddress $GITHUB_REPOSITORY_URL" info.plist
-      - name: Install dependencies
-        id: install_dependencies
-        run: |
-          dart pub get
-          dart pub global activate -sgit https://github.com/techouse/dart_pubspec_licenses_lite
-      - name: Run Dart code generation
-        id: generate_code
-        run: dart run build_runner build --delete-conflicting-outputs
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
-      - name: Analyze
-        run: dart analyze --fatal-infos
-      - name: Build executable
-        id: build_executable
-        run: bash build.sh
+          set -euo pipefail
+          test "$(/usr/libexec/PlistBuddy -c 'Print :version' build/dist/info.plist)" = "$VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :webaddress' build/dist/info.plist)" = "$EXPECTED_REPOSITORY_URL"
+          if grep -q 'workflow_intel' build/dist/info.plist; then
+            echo "Packaged info.plist still references workflow_intel" >&2
+            exit 1
+          fi
+          lipo -info build/dist/workflow | grep -q 'arm64'
+          lipo -info build/dist/workflow | grep -q 'x86_64'
+          xcrun vtool -arch arm64 -show-build build/dist/workflow | grep -Eq "minos[[:space:]]+$ARM64_DEPLOYMENT_TARGET([.]0)?$"
+          xcrun vtool -arch x86_64 -show-build build/dist/workflow | grep -Eq "minos[[:space:]]+$X86_64_DEPLOYMENT_TARGET([.]0)?$"
+          SMOKE_DIR=$(mktemp -d "${RUNNER_TEMP}/tailwind-smoke.XXXXXX")
+          trap 'rm -rf "$SMOKE_DIR"' EXIT
+          cp -R build/dist/. "$SMOKE_DIR/"
+          (
+            cd "$SMOKE_DIR"
+            ./workflow -q "background color" > smoke.json 2> smoke.stderr
+            jq -e '.items | length > 0' smoke.json > /dev/null
+          )
+          test ! -e build/dist/.env
+          test ! -e build/dist/query_cache
+          test ! -e build/dist/update_cache
+          test -z "$(find build/dist -maxdepth 1 -name '*_cache_keys.json' -print -quit)"
+
       - name: Install the Apple certificate
-        id: install_certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
-          set -e
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          
-          # import certificate
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          
-          # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
-          # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-      - name: Sign executable
-        id: sign_executable
+          set -euo pipefail
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -P "$P12_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+
+      - name: Sign universal binary
         env:
           BUILD_CERTIFICATE_SHA1: ${{ secrets.BUILD_CERTIFICATE_SHA1 }}
         run: |
-          set -e
-          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'print ":bundleid"' info.plist)
+          set -euo pipefail
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :bundleid' build/dist/info.plist)
           codesign \
-            --sign="$BUILD_CERTIFICATE_SHA1" \
-            --identifier="$BUNDLE_ID" \
-            --deep \
             --force \
-            --options=runtime \
-            --entitlement="entitlements.plist" \
+            --sign "$BUILD_CERTIFICATE_SHA1" \
+            --identifier "$BUNDLE_ID" \
+            --options runtime \
             --timestamp \
             build/dist/workflow
+
       - name: Verify signature
-        id: verify_executable_signature
         env:
           TEAM_ID: ${{ secrets.TEAM_ID }}
         run: |
-          set -e
-          if [[ $(codesign -dv build/dist/workflow 2>&1 | awk -F= '/TeamIdentifier/{print $2}') != "$TEAM_ID" ]]; then
-            echo "The TeamIdentifier in the signature does not match the signing TeamIdentifier."
+          set -euo pipefail
+          codesign --verify --strict --verbose=2 build/dist/workflow
+          ACTUAL_TEAM_ID=$(codesign -dv build/dist/workflow 2>&1 | awk -F= '/TeamIdentifier/{print $2}')
+          if [[ "$ACTUAL_TEAM_ID" != "$TEAM_ID" ]]; then
+            echo "Signature TeamIdentifier ($ACTUAL_TEAM_ID) does not match the expected team"
             exit 1
           fi
-      - name: Package executable into ZIP archive
-        id: zip_executable
-        run: |
-          set -e
-          zip -j build/dist/workflow.zip build/dist/workflow
+
+      - name: Create notarization archive
+        run: zip -j build/dist/workflow.zip build/dist/workflow
+
       - name: Create notarytool Keychain profile
-        id: create_keychain_profile
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          TEAM_ID: ${{ secrets.TEAM_ID }}
-          NOTARYTOOL_PASSWORD: ${{ secrets.NOTARYTOOL_PASSWORD }}
           NOTARYTOOL_KEYCHAIN_PROFILE: ${{ vars.NOTARYTOOL_KEYCHAIN_PROFILE }}
+          NOTARYTOOL_PASSWORD: ${{ secrets.NOTARYTOOL_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
         run: |
-          set -e
-          xcrun notarytool \
-            store-credentials "$NOTARYTOOL_KEYCHAIN_PROFILE" \
+          set -euo pipefail
+          xcrun notarytool store-credentials "$NOTARYTOOL_KEYCHAIN_PROFILE" \
             --apple-id "$APPLE_ID" \
             --team-id "$TEAM_ID" \
             --password "$NOTARYTOOL_PASSWORD"
-      - name: Notarize executable
-        id: notarize_executable
+
+      - name: Notarize universal binary
         env:
           NOTARYTOOL_KEYCHAIN_PROFILE: ${{ vars.NOTARYTOOL_KEYCHAIN_PROFILE }}
         run: |
-          set -e
-          xcrun notarytool \
-            submit build/dist/workflow.zip \
+          set -euo pipefail
+          xcrun notarytool submit build/dist/workflow.zip \
             --keychain-profile "$NOTARYTOOL_KEYCHAIN_PROFILE" \
             --wait
-      - name: Delete obsolete ZIP archive
-        id: delete_zip_archive
-        run: |
-          set -e
-          rm -rf build/dist/workflow.zip
-      - name: Compress artifacts
-        id: compress_artifacts
+          rm -f build/dist/workflow.zip
+
+      - name: Create Alfred workflow
         env:
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
-        working-directory: build/dist
         run: |
-          set -e
-          ARTIFACT_NAME=${WORKFLOW_NAME}-v${VERSION}-$(uname -m)
-          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
-          find . -not -path "./*_cache*" -exec zip --symlinks "../${ARTIFACT_NAME}.zip" {} +
-          echo "ARTIFACT_PATH=build/${ARTIFACT_NAME}.zip" >> $GITHUB_ENV
-      - name: Artifact
-        id: success_artifact
+          set -euo pipefail
+          PACKAGE_NAME="${WORKFLOW_NAME}-v${VERSION}"
+          TEMP_ARCHIVE="build/${PACKAGE_NAME}.alfredworkflow.tmp.zip"
+          trap 'rm -f "$TEMP_ARCHIVE"' EXIT
+          rm -f "$TEMP_ARCHIVE"
+          (cd build/dist && zip -qr "../${PACKAGE_NAME}.alfredworkflow.tmp.zip" . \
+            -x '.env' 'query_cache/*' 'update_cache/*' '*_cache/*' '*_cache_keys.json' 'workflow_intel')
+          mv -f "$TEMP_ARCHIVE" "build/${PACKAGE_NAME}.alfredworkflow"
+          trap - EXIT
+          echo "ARTIFACT_NAME=${PACKAGE_NAME}-universal" >> "$GITHUB_ENV"
+          echo "ARTIFACT_PATH=build/${PACKAGE_NAME}.alfredworkflow" >> "$GITHUB_ENV"
+
+      - name: Upload universal workflow
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
+          if-no-files-found: error
           retention-days: 1
-      - name: Clean up keychain and build directory
-        id: clean_up
+
+      - name: Clean up signing keychain and build directory
         if: ${{ always() }}
         run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-          rm -rf $RUNNER_TEMP/build_certificate.p12
-          rm .env
+          security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+          rm -f "$CERTIFICATE_PATH"
           rm -rf build
