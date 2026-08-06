@@ -21,15 +21,25 @@ fn result(result_type: &str) -> SearchResult {
 
 #[test]
 fn items_from_results_preserves_provider_order() -> Result<()> {
-    let mut second = result("lvl1");
+    let mut second = result("content");
     second.object_id = "second".to_owned();
-    second.hierarchy.lvl1 = Some("Second".to_owned());
 
     let items = items_from_results(&[result("lvl1"), second])?;
 
     assert_eq!(
         items.iter().map(Item::uid).collect::<Vec<_>>(),
         vec![Some("background-color"), Some("second")]
+    );
+    Ok(())
+}
+
+#[test]
+fn content_item_uses_root_title_without_breadcrumb() -> Result<()> {
+    let items = items_from_results(&[result("content")])?;
+
+    assert_eq!(
+        (items[0].title(), items[0].subtitle()),
+        ("Docs &amp; Guides", None)
     );
     Ok(())
 }

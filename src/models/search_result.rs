@@ -7,7 +7,7 @@ pub struct SearchResult {
     /// Algolia object identifier.
     #[serde(rename = "objectID")]
     pub object_id: String,
-    /// Algolia hierarchy level tag, such as `lvl2`.
+    /// Algolia record type, such as `lvl2` or `content`.
     #[serde(rename = "type")]
     pub result_type: String,
     /// Documentation URL opened by Alfred.
@@ -20,7 +20,13 @@ pub struct SearchResult {
 
 impl SearchResult {
     /// Returns the hierarchy level encoded by the result type.
+    ///
+    /// Content records use the root hierarchy level.
     pub fn hierarchy_level(&self) -> Result<usize> {
+        if self.result_type == "content" {
+            return Ok(0);
+        }
+
         let level = self
             .result_type
             .strip_prefix("lvl")
