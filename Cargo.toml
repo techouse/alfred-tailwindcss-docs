@@ -1,0 +1,21 @@
+[package]
+name = "alfred_tailwindcss_docs"
+version = "2.4.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Search the Tailwind CSS documentation using Alfred."
+license = "MIT"
+publish = false
+
+[dependencies]
+alfred_workflow_rs = "1.0"
+anyhow = "1.0"
+dotenvy = "0.15"
+html-escape = "0.2.15"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ureq = "3.3"
+url = "2.5"
+
+[dev-dependencies]
+tempfile = "3.10"
