@@ -1,9 +1,8 @@
-# Files and directories created by pub.
-.dart_tool/
-.packages
-
-# Conventional directory for build output.
+# Workflow packaging output.
 build/
+
+# Rust build output.
+target/
 
 # IDE specific
 .idea/
@@ -11,8 +10,8 @@ build/
 # macOS specific
 .DS_Store
 
-bin/*_cache/
 sign.sh
 
 .env
 prefs.plist
+.history

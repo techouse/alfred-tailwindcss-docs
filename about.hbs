@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tailwind CSS Docs for Alfred third-party licenses</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem auto; max-width: 70rem; padding: 0 1rem; }
+    pre { overflow-wrap: anywhere; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Third-party licenses</h1>
+  <p>This file contains license notices for Rust dependencies distributed with Tailwind CSS Docs for Alfred.</p>
+  {{#each licenses}}
+  <section id="{{id}}">
+    <h2>{{name}}</h2>
+    <h3>Used by</h3>
+    <ul>
+      {{#each used_by}}
+      <li>{{crate.name}} {{crate.version}}</li>
+      {{/each}}
+    </ul>
+    <pre>{{text}}</pre>
+  </section>
+  {{/each}}
+</body>
+</html>

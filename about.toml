@@ -1,0 +1,17 @@
+accepted = [
+    "Apache-2.0",
+    "MIT",
+    "BSD-3-Clause",
+    "ISC",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "CDLA-Permissive-2.0",
+]
+targets = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+]
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
+workarounds = ["ring"]
+private = { ignore = true }
