@@ -1,0 +1,87 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions: read-all
+
+jobs:
+  msrv-meta:
+    name: Read MSRV
+    runs-on: ubuntu-latest
+    outputs:
+      msrv: ${{ steps.read-msrv.outputs.msrv }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: read-msrv
+        name: Read rust-version from Cargo.toml
+        run: |
+          set -euo pipefail
+          msrv="$(
+            awk -F'"' '
+              /^[[:space:]]*\[package\][[:space:]]*$/ { in_package = 1; next }
+              /^[[:space:]]*\[/ { in_package = 0 }
+              in_package && /^[[:space:]]*rust-version[[:space:]]*=/ { print $2; exit }
+            ' Cargo.toml
+          )"
+          if [[ -z "$msrv" ]]; then
+            echo "failed to read package.rust-version from Cargo.toml" >&2
+            exit 1
+          fi
+          echo "msrv=${msrv}" >> "$GITHUB_OUTPUT"
+
+  stable:
+    name: Stable Rust checks
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install latest stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install cargo-about
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-about
+
+      - name: Cache Cargo build data
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Run tests
+        run: cargo test --all-targets --locked
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+
+      - name: Verify version metadata
+        run: ./scripts/version-check.sh
+
+      - name: Verify third-party license generation
+        run: make licenses
+
+  msrv:
+    name: MSRV (${{ needs.msrv-meta.outputs.msrv }})
+    needs: msrv-meta
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install MSRV
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ needs.msrv-meta.outputs.msrv }}
+
+      - name: Cache Cargo build data
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run tests on MSRV
+        run: cargo test --all-targets --all-features --locked
