@@ -77,3 +77,27 @@ fn search_response_deserializes_hierarchy() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn search_response_deserializes_content_result() -> Result<()> {
+    let response: SearchResponse = serde_json::from_value(json!({
+        "hits": [{
+            "objectID": "utility-first",
+            "type": "content",
+            "url": "https://tailwindcss.com/docs/styling-with-utility-classes",
+            "hierarchy": {
+                "lvl0": "Core concepts",
+                "lvl1": "Styling with utility classes",
+                "lvl2": null,
+                "lvl3": null,
+                "lvl4": null,
+                "lvl5": null,
+                "lvl6": null
+            },
+            "content": "Building complex components from a constrained set of primitive utilities."
+        }]
+    }))?;
+
+    assert_eq!(response.hits[0].hierarchy_level()?, 0);
+    Ok(())
+}
