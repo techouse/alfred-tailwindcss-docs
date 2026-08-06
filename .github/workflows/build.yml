@@ -177,7 +177,8 @@ jobs:
           xcrun notarytool store-credentials "$NOTARYTOOL_KEYCHAIN_PROFILE" \
             --apple-id "$APPLE_ID" \
             --team-id "$TEAM_ID" \
-            --password "$NOTARYTOOL_PASSWORD"
+            --password "$NOTARYTOOL_PASSWORD" \
+            --keychain "$KEYCHAIN_PATH"
 
       - name: Notarize universal binary
         env:
@@ -186,6 +187,7 @@ jobs:
           set -euo pipefail
           xcrun notarytool submit build/dist/workflow.zip \
             --keychain-profile "$NOTARYTOOL_KEYCHAIN_PROFILE" \
+            --keychain "$KEYCHAIN_PATH" \
             --wait
           rm -f build/dist/workflow.zip
 
