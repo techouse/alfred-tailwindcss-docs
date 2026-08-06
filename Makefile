@@ -1,54 +1,76 @@
-# Makefile
+SHELL := /bin/bash
+
+.PHONY: help build build-release fmt fmt-check clippy test licenses package version-check ci clean
 
 help:
-	@printf "%-20s %s\n" "Target" "Description"
-	@printf "%-20s %s\n" "------" "-----------"
-	@make -pqR : 2>/dev/null \
-		| awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' \
-		| sort \
-		| egrep -v -e '^[^[:alnum:]]' -e '^$@$$' \
-		| xargs -I _ sh -c 'printf "%-20s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
+	@printf '%-20s %s\n' 'Target' 'Description'
+	@printf '%-20s %s\n' '------' '-----------'
+	@printf '%-20s %s\n' 'build' 'Build the debug Rust executable.'
+	@printf '%-20s %s\n' 'build-release' 'Build the release workflow directory.'
+	@printf '%-20s %s\n' 'fmt' 'Format Rust source files.'
+	@printf '%-20s %s\n' 'fmt-check' 'Check Rust formatting.'
+	@printf '%-20s %s\n' 'clippy' 'Run strict Clippy checks.'
+	@printf '%-20s %s\n' 'test' 'Run all Rust tests.'
+	@printf '%-20s %s\n' 'licenses' 'Generate third-party license notices.'
+	@printf '%-20s %s\n' 'package' 'Create a local .alfredworkflow package.'
+	@printf '%-20s %s\n' 'version-check' 'Verify Cargo and optional tag versions agree.'
+	@printf '%-20s %s\n' 'ci' 'Run all local CI checks.'
+	@printf '%-20s %s\n' 'clean' 'Remove Rust and workflow build output.'
 
-analyze:
-	@# Help: Analyze the project's Dart code.
-	dart analyze --fatal-infos
+build:
+	cargo build --locked
 
-compile:
-	@# Help: Compile the executable binary
-	bash ./build.sh
+build-release:
+	@set -euo pipefail; \
+	if [[ -f .env ]]; then \
+		set -a; \
+		source .env; \
+		set +a; \
+	fi; \
+	for variable_name in ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_SEARCH_INDEX; do \
+		if [[ -z "$${!variable_name:-}" ]]; then \
+			echo "$$variable_name must be set in the environment or .env file" >&2; \
+			exit 1; \
+		fi; \
+	done; \
+	cargo build --release --locked
+	./scripts/package-workflow.sh target/release/alfred_tailwindcss_docs
 
-check_format:
-	@# Help: Check the formatting of one or more Dart files.
-	dart format --output=none --set-exit-if-changed .
+fmt:
+	cargo fmt --all
 
-check_outdated:
-	@# Help: Check which of the project's packages are outdated.
-	dart pub outdated
+fmt-check:
+	cargo fmt --all --check
 
-check_style:
-	@# Help: Analyze the project's Dart code and check the formatting one or more Dart files.
-	make analyze && make check_format
+clippy:
+	cargo clippy --all-targets --all-features --locked -- -D warnings
 
-clean_code_gen:
-	@# Help: Remove all generated files.
-	dart run build_runner clean
+test:
+	cargo test --all-targets --locked
 
-code_gen:
-	@# Help: Run the build system for Dart code generation and modular compilation.
-	dart run build_runner build --delete-conflicting-outputs
+licenses:
+	@mkdir -p build
+	cargo-about generate --locked --fail --output-file build/THIRD_PARTY_LICENSES.html about.hbs
 
-code_gen_watcher:
-	@# Help: Run the build system for Dart code generation and modular compilation as a watcher.
-	dart run build_runner watch --delete-conflicting-outputs
+package: build-release
+	@set -euo pipefail; \
+	VERSION="$$(awk '/^\[package\]$$/ { p = 1; next } p && /^\[/ { exit } p && /^version = / { gsub(/["[:space:]]/, "", $$3); print $$3; exit }' Cargo.toml)"; \
+	WORKFLOW_NAME="$${WORKFLOW_NAME:-tailwindcss-docs}"; \
+	ARCHIVE="build/$${WORKFLOW_NAME}-v$${VERSION}.alfredworkflow"; \
+	TEMP_ARCHIVE="$${ARCHIVE}.tmp.zip"; \
+	trap 'rm -f "$$TEMP_ARCHIVE"' EXIT; \
+	rm -f "$$TEMP_ARCHIVE"; \
+	(cd build/dist && zip -qr "../$${WORKFLOW_NAME}-v$${VERSION}.alfredworkflow.tmp.zip" . \
+		-x '.env' 'query_cache/*' 'update_cache/*' '*_cache/*' '*_cache_keys.json' 'workflow_intel'); \
+	mv -f "$$TEMP_ARCHIVE" "$$ARCHIVE"; \
+	trap - EXIT; \
+	echo "Created $$ARCHIVE"
 
-format:
-	@# Help: Format one or more Dart files.
-	dart format .
+version-check:
+	./scripts/version-check.sh
 
-install:
-	@# Help: Install all the project's packages
-	dart pub get
+ci: fmt-check test clippy version-check
 
-upgrade:
-	@# Help: Upgrade all the project's packages.
-	dart pub upgrade
+clean:
+	cargo clean
+	rm -rf build
