@@ -22,6 +22,20 @@ fn endpoint_uses_single_index_search_route() -> Result<()> {
 }
 
 #[test]
+fn client_uses_platform_verifier_and_search_timeouts() -> Result<()> {
+    let client = AlgoliaSearch::with_base_url(config(), Url::parse("http://localhost/")?)?;
+    let timeouts = client.agent.config().timeouts();
+
+    assert!(matches!(
+        client.agent.config().tls_config().root_certs(),
+        ureq::tls::RootCerts::PlatformVerifier
+    ));
+    assert_eq!(timeouts.connect, Some(CONNECT_TIMEOUT));
+    assert_eq!(timeouts.global, Some(SEARCH_TIMEOUT));
+    Ok(())
+}
+
+#[test]
 fn request_body_preserves_tailwind_search_contract() -> Result<()> {
     let client = AlgoliaSearch::with_base_url(config(), Url::parse("http://localhost/")?)?;
     let body: serde_json::Value =

@@ -7,6 +7,8 @@ use url::Url;
 
 use crate::models::{SearchResponse, SearchResult};
 
+use super::http::platform_agent;
+
 const MAX_RESPONSE_BYTES: u64 = 2 * 1024 * 1024;
 const SEARCH_TIMEOUT: Duration = Duration::from_secs(5);
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(2);
@@ -112,11 +114,7 @@ impl AlgoliaSearch {
             return Err(anyhow!("ALGOLIA_SEARCH_INDEX must not be empty"));
         }
 
-        let agent: Agent = Agent::config_builder()
-            .timeout_connect(Some(CONNECT_TIMEOUT))
-            .timeout_global(Some(SEARCH_TIMEOUT))
-            .build()
-            .into();
+        let agent = platform_agent(CONNECT_TIMEOUT, SEARCH_TIMEOUT);
 
         Ok(Self {
             config,
