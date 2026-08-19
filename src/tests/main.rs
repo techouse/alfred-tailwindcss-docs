@@ -81,11 +81,45 @@ fn empty_query_shows_placeholder_without_searching() -> Result<()> {
 }
 
 #[test]
+fn empty_query_does_not_enter_file_cache() -> Result<()> {
+    let directory = tempfile::tempdir()?;
+    let mut settings = settings("v4");
+    settings.use_file_cache = true;
+    let search_calls = Cell::new(0);
+    let cli = Cli::default();
+    let mut first = Workflow::with_file_cache(FileCache::with_path(directory.path()));
+
+    populate_workflow_with(&mut first, &cli, &settings, |_, _| {
+        search_calls.set(search_calls.get() + 1);
+        Ok(Vec::new())
+    })?;
+
+    let mut second = Workflow::with_file_cache(FileCache::with_path(directory.path()));
+    populate_workflow_with(&mut second, &cli, &settings, |_, _| {
+        search_calls.set(search_calls.get() + 1);
+        Ok(Vec::new())
+    })?;
+
+    assert_eq!(
+        (
+            search_calls.get(),
+            first.cache_key(),
+            first.get_items()?.len(),
+            second.cache_key(),
+            second.get_items()?.len(),
+        ),
+        (0, None, 1, None, 1)
+    );
+    Ok(())
+}
+
+#[test]
 fn file_cache_hit_bypasses_algolia() -> Result<()> {
     let directory = tempfile::tempdir()?;
     let mut cached = Workflow::with_file_cache(FileCache::with_path(directory.path()));
     cached.set_cache_key(Some("background_v4"));
-    cached.add_item(Item::new("cached result"))?;
+    let cached_item = google_fallback_item("background")?;
+    cached.add_item(cached_item.clone())?;
 
     let mut workflow = Workflow::with_file_cache(FileCache::with_path(directory.path()));
     let mut settings = settings("v4");
@@ -101,10 +135,8 @@ fn file_cache_hit_bypasses_algolia() -> Result<()> {
         Ok(Vec::new())
     })?;
 
-    assert_eq!(
-        (search_calls.get(), workflow.get_items()?.items()[0].title()),
-        (0, "cached result")
-    );
+    assert_eq!(search_calls.get(), 0);
+    assert_eq!(workflow.get_items()?.items(), &[cached_item]);
     Ok(())
 }
 

@@ -131,7 +131,7 @@ where
 fn configure_cache(workflow: &mut Workflow, query: &str, settings: &WorkflowSettings) {
     if settings.use_alfred_cache {
         workflow.set_use_automatic_cache(true);
-    } else if settings.use_file_cache {
+    } else if settings.use_file_cache && !query.is_empty() {
         workflow.set_cache_key(Some(file_cache_key(query, &settings.tailwind_version)));
         workflow.set_max_cache_entries(settings.file_cache_max_entries);
     }

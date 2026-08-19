@@ -8,7 +8,7 @@ license = "MIT"
 publish = false
 
 [dependencies]
-alfred_workflow_rs = "1.0"
+alfred_workflow_rs = "1.0.1"
 anyhow = "1.0"
 dotenvy = "0.15"
 html-escape = "0.2.15"
