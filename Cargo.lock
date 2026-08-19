@@ -25,9 +25,9 @@ dependencies = [
 
 [[package]]
 name = "alfred_workflow_rs"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10c306988a991853d2fe7215a2b283b0d6d4874e0c30cb4cac76e674326d8514"
+checksum = "d9b90a12b4d637223d6793f34ec47e9e469514f0edb940645facac278c529d1d"
 dependencies = [
  "cached",
  "md5",
