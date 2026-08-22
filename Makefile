@@ -24,7 +24,7 @@ build-release:
 	@set -euo pipefail; \
 	missing_names=(); \
 	for variable_name in ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_SEARCH_INDEX; do \
-		if [[ -z "$${!variable_name:-}" ]]; then \
+		if [[ -z "$${!variable_name+x}" ]]; then \
 			missing_names+=("$$variable_name"); \
 		fi; \
 	done; \
