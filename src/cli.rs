@@ -22,10 +22,7 @@ impl Cli {
                 _ if argument.starts_with("--query=") => {
                     cli.query = argument["--query=".len()..].to_owned();
                 }
-                _ if argument.len() > 2
-                    && argument.starts_with('-')
-                    && !argument.starts_with("--") =>
-                {
+                _ if is_valid_short_option_cluster(&argument) => {
                     for (offset, character) in argument[1..].char_indices() {
                         match character {
                             'v' => cli.verbose = true,
@@ -68,11 +65,28 @@ fn take_query_value(option: &str, arguments: &mut impl Iterator<Item = String>) 
         value.as_str(),
         "-q" | "--query" | "-v" | "--verbose" | "-u" | "--update"
     ) || value.starts_with("--query=")
+        || is_valid_short_option_cluster(&value)
     {
         bail!("{option} requires a value");
     }
 
     Ok(value)
+}
+
+fn is_valid_short_option_cluster(argument: &str) -> bool {
+    if argument.len() <= 2 || !argument.starts_with('-') || argument.starts_with("--") {
+        return false;
+    }
+
+    for character in argument[1..].chars() {
+        match character {
+            'v' | 'u' => {}
+            'q' => return true,
+            _ => return false,
+        }
+    }
+
+    true
 }
 
 #[cfg(test)]
