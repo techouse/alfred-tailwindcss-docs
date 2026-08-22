@@ -22,16 +22,37 @@ build:
 
 build-release:
 	@set -euo pipefail; \
-	if [[ -f .env ]]; then \
-		set -a; \
-		source .env; \
-		set +a; \
+	missing_names=(); \
+	for variable_name in ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_SEARCH_INDEX; do \
+		if [[ -z "$${!variable_name:-}" ]]; then \
+			missing_names+=("$$variable_name"); \
+		fi; \
+	done; \
+	if (( $${#missing_names[@]} > 0 )) && [[ -f ./.env ]]; then \
+		dotenv_exports="$$( \
+			set -a; \
+			source ./.env; \
+			set +a; \
+			for variable_name in "$${missing_names[@]}"; do \
+				if [[ -n "$${!variable_name:-}" ]]; then \
+					printf '%s=%q\n' "$$variable_name" "$${!variable_name}"; \
+				fi; \
+			done \
+		)"; \
+		while IFS= read -r assignment; do \
+			if [[ -n "$$assignment" ]]; then \
+				eval "export $$assignment"; \
+			fi; \
+		done <<< "$$dotenv_exports"; \
 	fi; \
 	for variable_name in ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_SEARCH_INDEX; do \
 		if [[ -z "$${!variable_name:-}" ]]; then \
 			echo "$$variable_name must be set in the environment or .env file" >&2; \
 			exit 1; \
 		fi; \
+	done; \
+	for variable_name in ALGOLIA_APPLICATION_ID ALGOLIA_SEARCH_ONLY_API_KEY ALGOLIA_SEARCH_INDEX; do \
+		export "$$variable_name"; \
 	done; \
 	cargo build --release --locked
 	./scripts/package-workflow.sh target/release/alfred_tailwindcss_docs
@@ -69,7 +90,7 @@ package: build-release
 version-check:
 	./scripts/version-check.sh
 
-ci: fmt-check test clippy version-check
+ci: fmt-check test clippy version-check licenses
 
 clean:
 	cargo clean
