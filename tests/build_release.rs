@@ -161,6 +161,21 @@ fn build_release_fails_on_malformed_dotenv_when_runtime_is_incomplete() -> Resul
 }
 
 #[test]
+fn build_release_fails_when_dotenv_fails_after_setting_values() -> Result<()> {
+    let fixture = Fixture::new()?;
+    fs::write(
+        fixture.directory.path().join(".env"),
+        "ALGOLIA_APPLICATION_ID=dotenv-app\nALGOLIA_SEARCH_ONLY_API_KEY=dotenv-key\nALGOLIA_SEARCH_INDEX=dotenv-index\nfalse\n",
+    )?;
+
+    let output = fixture.command().output()?;
+
+    assert!(!output.status.success());
+    assert!(!fixture.record_path.exists());
+    Ok(())
+}
+
+#[test]
 fn build_release_fails_when_dotenv_exits_early() -> Result<()> {
     let fixture = Fixture::new()?;
     fs::write(fixture.directory.path().join(".env"), "exit 0\n")?;

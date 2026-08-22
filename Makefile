@@ -32,7 +32,11 @@ build-release:
 		dotenv_exports="$$( \
 			set -a; \
 			source ./.env; \
+			dotenv_status=$$?; \
 			set +a; \
+			if (( dotenv_status != 0 )); then \
+				exit "$$dotenv_status"; \
+			fi; \
 			for variable_name in "$${missing_names[@]}"; do \
 				if [[ -n "$${!variable_name:-}" ]]; then \
 					printf '%s=%q\n' "$$variable_name" "$${!variable_name}"; \
