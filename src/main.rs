@@ -47,10 +47,7 @@ fn main() -> ExitCode {
             if cli.verbose {
                 eprintln!("{error:#}");
             }
-            if let Err(clear_error) = workflow.clear_items() {
-                eprintln!("failed to clear workflow items: {clear_error}");
-            }
-            if let Err(add_error) = workflow.add_item(Item::new(error.to_string())) {
+            if let Err(add_error) = replace_items_with_runtime_error(&mut workflow, &error) {
                 eprintln!("failed to render workflow error: {add_error}");
                 return ExitCode::from(1);
             }
@@ -64,6 +61,17 @@ fn main() -> ExitCode {
     }
 
     exit_code
+}
+
+fn replace_items_with_runtime_error(
+    workflow: &mut Workflow,
+    error: &anyhow::Error,
+) -> alfred_workflow_rs::Result<()> {
+    if let Err(clear_error) = workflow.clear_items() {
+        eprintln!("failed to clear workflow items: {clear_error}");
+    }
+    workflow.clear_cache_key();
+    workflow.add_item(Item::new(error.to_string()))
 }
 
 fn render_error(

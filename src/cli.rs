@@ -15,14 +15,33 @@ impl Cli {
         while let Some(argument) = arguments.next() {
             match argument.as_str() {
                 "-q" | "--query" => {
-                    cli.query = arguments
-                        .next()
-                        .ok_or_else(|| anyhow::anyhow!("{argument} requires a value"))?;
+                    cli.query = take_query_value(&argument, &mut arguments)?;
                 }
                 "-v" | "--verbose" => cli.verbose = true,
                 "-u" | "--update" => cli.update = true,
                 _ if argument.starts_with("--query=") => {
                     cli.query = argument["--query=".len()..].to_owned();
+                }
+                _ if argument.len() > 2
+                    && argument.starts_with('-')
+                    && !argument.starts_with("--") =>
+                {
+                    for (offset, character) in argument[1..].char_indices() {
+                        match character {
+                            'v' => cli.verbose = true,
+                            'u' => cli.update = true,
+                            'q' => {
+                                let attached = &argument[1 + offset + 1..];
+                                cli.query = if attached.is_empty() {
+                                    take_query_value("-q", &mut arguments)?
+                                } else {
+                                    attached.to_owned()
+                                };
+                                break;
+                            }
+                            _ => bail!("unknown argument: {argument}"),
+                        }
+                    }
                 }
                 _ => bail!("unknown argument: {argument}"),
             }
@@ -39,6 +58,21 @@ impl Cli {
             .join(" ")
             .to_lowercase()
     }
+}
+
+fn take_query_value(option: &str, arguments: &mut impl Iterator<Item = String>) -> Result<String> {
+    let value = arguments
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("{option} requires a value"))?;
+    if matches!(
+        value.as_str(),
+        "-q" | "--query" | "-v" | "--verbose" | "-u" | "--update"
+    ) || value.starts_with("--query=")
+    {
+        bail!("{option} requires a value");
+    }
+
+    Ok(value)
 }
 
 #[cfg(test)]
