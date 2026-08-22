@@ -64,6 +64,34 @@ fn item_decodes_html_entities_in_breadcrumb() -> Result<()> {
 }
 
 #[test]
+fn item_decodes_semicolonless_entities_in_breadcrumb() -> Result<()> {
+    let mut item_result = result("lvl1");
+    item_result.hierarchy.lvl0 = "Guides &copy and &#38; Unknown &doesnotexist;".to_owned();
+
+    let items = items_from_results(&[item_result])?;
+
+    assert_eq!(
+        items[0].subtitle(),
+        Some("Guides © and & Unknown &doesnotexist; > Background & Color")
+    );
+    Ok(())
+}
+
+#[test]
+fn item_preserves_dart_incompatible_numeric_entities_in_breadcrumb() -> Result<()> {
+    let mut item_result = result("lvl1");
+    item_result.hierarchy.lvl0 = "Guides &#38 and &#X26;".to_owned();
+
+    let items = items_from_results(&[item_result])?;
+
+    assert_eq!(
+        items[0].subtitle(),
+        Some("Guides &#38 and &#X26; > Background & Color")
+    );
+    Ok(())
+}
+
+#[test]
 fn item_preserves_url_fields() -> Result<()> {
     let items = items_from_results(&[result("lvl1")])?;
     let item = &items[0];
