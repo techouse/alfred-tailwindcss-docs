@@ -60,6 +60,18 @@ fn parse_rejects_short_query_followed_by_update_flag() {
 }
 
 #[test]
+fn parse_rejects_short_option_clusters_as_query_values() {
+    for option in ["-q", "--query"] {
+        for value in ["-vu", "-vuqbackground"] {
+            let error = Cli::parse([option.to_owned(), value.to_owned()])
+                .expect_err("valid short-option clusters must not become query values");
+
+            assert_eq!(error.to_string(), format!("{option} requires a value"));
+        }
+    }
+}
+
+#[test]
 fn parse_accepts_unrecognized_dash_prefixed_query() -> Result<()> {
     let cli = Cli::parse(["-q".to_owned(), "--force".to_owned()])?;
 
