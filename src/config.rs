@@ -10,12 +10,33 @@ const EMBEDDED_SEARCH_ONLY_API_KEY: Option<&str> = option_env!("ALGOLIA_SEARCH_O
 const EMBEDDED_SEARCH_INDEX: Option<&str> = option_env!("ALGOLIA_SEARCH_INDEX");
 
 pub(crate) fn algolia_search_config() -> Result<AlgoliaSearchConfig> {
-    let dotenv_values = load_dotenv(Path::new(".env"))?;
+    algolia_search_config_from(
+        std::env::var("ALGOLIA_APPLICATION_ID"),
+        std::env::var("ALGOLIA_SEARCH_ONLY_API_KEY"),
+        std::env::var("ALGOLIA_SEARCH_INDEX"),
+        Path::new(".env"),
+    )
+}
+
+fn algolia_search_config_from(
+    runtime_application_id: Result<String, VarError>,
+    runtime_api_key: Result<String, VarError>,
+    runtime_index_name: Result<String, VarError>,
+    dotenv_path: &Path,
+) -> Result<AlgoliaSearchConfig> {
+    let dotenv_values = if matches!(&runtime_application_id, Err(VarError::NotPresent))
+        || matches!(&runtime_api_key, Err(VarError::NotPresent))
+        || matches!(&runtime_index_name, Err(VarError::NotPresent))
+    {
+        load_dotenv(dotenv_path)?
+    } else {
+        HashMap::new()
+    };
 
     Ok(AlgoliaSearchConfig {
         application_id: configuration_value(
             "ALGOLIA_APPLICATION_ID",
-            std::env::var("ALGOLIA_APPLICATION_ID"),
+            runtime_application_id,
             dotenv_values
                 .get("ALGOLIA_APPLICATION_ID")
                 .map(String::as_str),
@@ -23,7 +44,7 @@ pub(crate) fn algolia_search_config() -> Result<AlgoliaSearchConfig> {
         )?,
         api_key: configuration_value(
             "ALGOLIA_SEARCH_ONLY_API_KEY",
-            std::env::var("ALGOLIA_SEARCH_ONLY_API_KEY"),
+            runtime_api_key,
             dotenv_values
                 .get("ALGOLIA_SEARCH_ONLY_API_KEY")
                 .map(String::as_str),
@@ -31,7 +52,7 @@ pub(crate) fn algolia_search_config() -> Result<AlgoliaSearchConfig> {
         )?,
         index_name: configuration_value(
             "ALGOLIA_SEARCH_INDEX",
-            std::env::var("ALGOLIA_SEARCH_INDEX"),
+            runtime_index_name,
             dotenv_values
                 .get("ALGOLIA_SEARCH_INDEX")
                 .map(String::as_str),
@@ -71,14 +92,13 @@ fn configuration_value(
         Err(VarError::NotPresent) => match dotenv_value {
             Some("") => Err(anyhow!("{name} must not be empty")),
             Some(value) => Ok(value.to_owned()),
-            None => embedded_value
-                .filter(|value| !value.is_empty())
-                .map(str::to_owned)
-                .ok_or_else(|| {
-                    anyhow!(
-                        "{name} must be set in the environment, .env file, or embedded at build time"
-                    )
-                }),
+            None => match embedded_value {
+                Some("") => Err(anyhow!("{name} must not be empty")),
+                Some(value) => Ok(value.to_owned()),
+                None => Err(anyhow!(
+                    "{name} must be set in the environment, .env file, or embedded at build time"
+                )),
+            },
         },
     }
 }

@@ -114,6 +114,44 @@ fn empty_query_does_not_enter_file_cache() -> Result<()> {
 }
 
 #[test]
+fn runtime_error_does_not_enter_file_cache() -> Result<()> {
+    let directory = tempfile::tempdir()?;
+    let mut settings = settings("v4");
+    settings.use_file_cache = true;
+    let cli = Cli {
+        query: "background".to_owned(),
+        ..Cli::default()
+    };
+    let mut first = Workflow::with_file_cache(FileCache::with_path(directory.path()));
+
+    let error = populate_workflow_with(&mut first, &cli, &settings, |_, _| {
+        Err(anyhow::anyhow!("transient search failure"))
+    })
+    .expect_err("the first search must fail");
+    replace_items_with_runtime_error(&mut first, &error)?;
+
+    assert!(first.cache_key().is_none());
+    assert_eq!(
+        first.get_items()?.items()[0].title(),
+        "transient search failure"
+    );
+
+    let search_calls = Cell::new(0);
+    let mut second = Workflow::with_file_cache(FileCache::with_path(directory.path()));
+    populate_workflow_with(&mut second, &cli, &settings, |_, _| {
+        search_calls.set(search_calls.get() + 1);
+        Ok(Vec::new())
+    })?;
+
+    assert_eq!(search_calls.get(), 1);
+    assert_eq!(
+        second.get_items()?.items()[0].title(),
+        "No matching answers found"
+    );
+    Ok(())
+}
+
+#[test]
 fn file_cache_hit_bypasses_algolia() -> Result<()> {
     let directory = tempfile::tempdir()?;
     let mut cached = Workflow::with_file_cache(FileCache::with_path(directory.path()));
