@@ -389,6 +389,30 @@ fn query_rejects_oversized_decoded_response() -> Result<()> {
 }
 
 #[test]
+fn query_falls_back_after_oversized_5xx_response() -> Result<()> {
+    let body = "x".repeat((MAX_RESPONSE_BYTES + 1) as usize);
+    let (first_url, first_server) = serve_gzip_once(503, &body)?;
+    let (second_url, second_server) = serve_once(200, r#"{"hits":[]}"#)?;
+    let client = AlgoliaSearch::with_read_hosts_and_agent(
+        config(),
+        vec![first_url, second_url],
+        no_proxy_agent(),
+    )?;
+
+    let hits = client.query("background", "v4")?;
+
+    first_server
+        .join()
+        .map_err(|_| anyhow::anyhow!("first server thread panicked"))?;
+    second_server
+        .join()
+        .map_err(|_| anyhow::anyhow!("second server thread panicked"))?;
+
+    assert!(hits.is_empty());
+    Ok(())
+}
+
+#[test]
 fn query_accepts_response_exactly_at_size_cap() -> Result<()> {
     let prefix = "{\"hits\":[],\"pad\":\"";
     let suffix = "\"}";

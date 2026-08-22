@@ -195,9 +195,13 @@ impl AlgoliaSearch {
                 classify_ureq_error(endpoint, "read response body", ureq::Error::from(error))
             })?;
         if response_body.len() as u64 > MAX_RESPONSE_BYTES {
-            return Err(AttemptFailure::Terminal(anyhow!(
-                "Algolia response body from {endpoint} exceeds {MAX_RESPONSE_BYTES} bytes"
-            )));
+            let error =
+                anyhow!("Algolia response body from {endpoint} exceeds {MAX_RESPONSE_BYTES} bytes");
+            return Err(if (500..=599).contains(&status) {
+                AttemptFailure::Retryable(error)
+            } else {
+                AttemptFailure::Terminal(error)
+            });
         }
 
         if (200..=299).contains(&status) {
